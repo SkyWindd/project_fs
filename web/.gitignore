@@ -25,6 +25,9 @@ dist-ssr
 
 # Dependencies
 node_modules/
+node module/
+node_module/
+nodemodule/
 
 # Build output
 dist/
