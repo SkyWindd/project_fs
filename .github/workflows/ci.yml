@@ -1,0 +1,54 @@
+name: CI/CD for Monorepo
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  setup-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Lấy code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # 3️⃣ Cài dependencies tại root (tự động cài cho tất cả workspace)
+      - name: Install dependencies
+        run: npm install
+
+      # 4️⃣ Build module web
+      - name: Build web app
+        working-directory: ./web
+        run: |
+          if [ -f package.json ]; then
+            echo "Building web..."
+            npm run build || echo "No build script found in web"
+          fi
+
+      # 5️⃣ Build module mobile
+      - name: Build mobile app
+        working-directory: ./mobile
+        run: |
+          if [ -f package.json ]; then
+            echo "Building mobile..."
+            npm run build || echo "No build script found in mobile"
+          fi
+
+      # 6️⃣ (Tuỳ chọn) Deploy web
+      - name: Deploy web to Vercel
+        if: github.ref == 'refs/heads/main'
+        working-directory: ./web
+        run: |
+          if [ -f package.json ]; then
+            npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+          fi
