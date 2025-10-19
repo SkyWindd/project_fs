@@ -16,11 +16,6 @@ export default function Header() {
   const [userLocation, setUserLocation] = useState<string>("")
   const { isMobile } = useResponsive() // ✅ hook phát hiện mobile
 
-  // Rút gọn chuỗi địa chỉ
-  const shortenAddress = (addr: string) => {
-    if (isMobile) return addr.length > 10 ? addr.slice(0, 10) + "..." : addr
-    return addr.length > 60 ? addr.slice(0, 60) + "..." : addr
-  }
 
   const categories = [
     { name: "Pizza", link: "/menu/pizza" },
