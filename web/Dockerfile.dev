@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1.4
+FROM node:20-bookworm
+
+WORKDIR /app
+COPY web/package*.json ./
+
+RUN --mount=type=cache,target=/root/.npm npm install
+
+COPY web/ ./
+EXPOSE 5173
+CMD ["npm", "run", "start", "--", "--host"]
