@@ -1,16 +1,21 @@
-import Header from "./Header"
-import Footer from "./Footer"
+import { useState } from "react"
 import { Outlet } from "react-router-dom"
+import Header from "../layout/Header"
+import Footer from "../layout/Footer"
 
 export default function MainLayout() {
+  const [selectedCategory, setSelectedCategory] = useState("Tất cả")
+
   return (
     <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1 mt-[120px]">
-            <div className="text-center text-gray-500 p-6">MainLayout đang hoạt động</div>
-            <Outlet />
-        </main>
-        <Footer />
+      <Header
+        onSelectCategory={setSelectedCategory}
+        selectedCategory={selectedCategory}
+      />
+      <main className="flex-1">
+        <Outlet context={{ selectedCategory }} />
+      </main>
+      <Footer />
     </div>
   )
 }

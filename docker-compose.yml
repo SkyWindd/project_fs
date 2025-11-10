@@ -1,8 +1,11 @@
+
 services:
   web:
     build:
       context: .
       dockerfile: web/Dockerfile.dev
+    container_name: fooddrone_web
+    working_dir: /app
     volumes:
       - ./web:/app
       - /app/node_modules
@@ -10,11 +13,15 @@ services:
       - "5173:5173"
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - HOST=0.0.0.0
+    command: npm run dev
 
   expo:
     build:
       context: .
       dockerfile: mobile/Dockerfile
+    container_name: fooddrone_mobile
+    working_dir: /app
     volumes:
       - ./mobile:/app
       - /app/node_modules
@@ -26,3 +33,5 @@ services:
     environment:
       - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
       - EXPO_NO_NATIVE_DEVTOOLS=1
+      - REACT_NATIVE_PACKAGER_HOSTNAME=0.0.0.0
+    command: npm start
