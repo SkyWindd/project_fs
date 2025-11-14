@@ -12,14 +12,17 @@ interface CartItem {
   name: string
   price: number
   quantity: number
-  image_url?: string // ✅ thêm ảnh
+  size?: string
+  crust?: string
+  category_id?: number
+  image_url?: string
 }
 
 interface SummarySectionProps {
   cartItems: CartItem[]
   subtotal: number
   total: number
-  onOrder: () => void
+  onOrder: (total: number) => void
 }
 
 export default function SummarySection({
@@ -29,27 +32,34 @@ export default function SummarySection({
   onOrder,
 }: SummarySectionProps) {
   return (
-    <aside className="space-y-4">
-      {/* 🧾 Giỏ hàng */}
-      <Card className="shadow-sm border-gray-200">
+    <aside className="space-y-5">
+
+      {/* 🧾 GIỎ HÀNG */}
+      <Card className="shadow-sm border border-gray-200 rounded-2xl">
         <CardHeader>
-          <CardTitle>Giỏ hàng của tôi</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Giỏ hàng của tôi
+          </CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-600">
             Có {cartItems.length} sản phẩm trong giỏ hàng
           </p>
 
-          {/* 🧱 Danh sách sản phẩm */}
-          <ul className="divide-y divide-gray-100">
+          {/* DANH SÁCH SẢN PHẨM */}
+        <ul className="divide-y divide-gray-100">
             {cartItems.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center justify-between gap-3 py-3"
+                className="flex items-center justify-between gap-3 py-4"
               >
-                {/* Ảnh + tên */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-md overflow-hidden border">
+
+                {/* LEFT: Image + Info */}
+                <div className="flex items-center gap-4">
+
+                  {/* IMAGE */}
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white">
                     <img
                       src={item.image_url || "/images/placeholder.jpg"}
                       alt={item.name}
@@ -57,74 +67,91 @@ export default function SummarySection({
                     />
                   </div>
 
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 leading-tight">
+                  {/* TEXT INFO */}
+                  <div className="flex flex-col">
+                    {/* NAME */}
+                    <p className="text-sm font-semibold text-gray-900 leading-tight">
                       {item.name}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      × {item.quantity}
-                    </p>
+
+                    {/* Size + Crust (pizza only) */}
+                    {item.category_id === 1 && (
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        <span className="font-medium text-gray-600">Cỡ:</span> {item.size} &nbsp;•&nbsp;
+                        <span className="font-medium text-gray-600">Đế:</span> {item.crust}
+                      </p>
+                    )}
+
+                    {/* QUANTITY */}
+                    <p className="text-xs text-gray-500 mt-1">x{item.quantity}</p>
                   </div>
                 </div>
 
-                {/* Giá */}
+                {/* RIGHT: PRICE */}
                 <div className="text-right">
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-bold text-gray-900 block">
                     {(item.price * item.quantity).toLocaleString()}₫
                   </span>
                 </div>
+
               </li>
             ))}
           </ul>
 
-          {/* Tổng kết */}
-          <div className="border-t pt-3 text-sm space-y-1">
-            <div className="flex justify-between">
-              <span>Tạm tính</span>
-              <span>{subtotal.toLocaleString()}₫</span>
+
+          {/* TỔNG KẾT */}
+          <div className="bg-gray-50 p-4 rounded-xl border space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Tạm tính</span>
+              <span className="font-medium">{subtotal.toLocaleString()}₫</span>
             </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Phí giao hàng</span>
-              <span>0₫</span>
-            </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Giảm giá thành viên</span>
-              <span>0₫</span>
+
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Phí giao hàng</span>
+              <span className="font-medium">0₫</span>
             </div>
 
             <hr className="my-2" />
 
-            <div className="flex justify-between font-semibold text-lg text-gray-900">
+            <div className="flex justify-between items-center text-lg font-semibold text-gray-900">
               <span>Tổng cộng</span>
-              <span>{total.toLocaleString()}₫</span>
+              <span className="text-red-600 font-bold">
+                {total.toLocaleString()}₫
+              </span>
             </div>
-            <p className="text-xs text-gray-500">
-              Nhận {(subtotal / 10000).toFixed(0)} điểm Pizza Rewards
-            </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* ✅ Điều khoản + nút đặt hàng */}
-      <Card className="shadow-sm border-gray-200">
+      {/* NÚT ĐẶT HÀNG */}
+      <Card className="shadow-sm border border-gray-200 rounded-2xl">
         <CardContent className="space-y-4 pt-5">
-          <div className="flex items-center space-x-2">
+
+          {/* CHECKBOX */}
+          <div className="flex items-start gap-3">
             <Checkbox id="agree" defaultChecked />
+
             <label
               htmlFor="agree"
-              className="text-sm text-gray-700 cursor-pointer leading-tight"
+              className="text-sm leading-snug text-gray-700 cursor-pointer"
             >
-              Tôi đồng ý với các điều khoản & điều kiện
+              Tôi đồng ý với các điều khoản & điều kiện của cửa hàng
             </label>
           </div>
+
+          {/* BUTTON */}
           <Button
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg shadow active:scale-95"
-            onClick={onOrder}
-          >
-            Đặt hàng
+            className="
+              w-full py-3 rounded-xl shadow-md 
+              bg-red-600 hover:bg-red-700 text-white font-semibold 
+              active:scale-[0.98] transition-all
+            "
+            onClick={() => onOrder(total)}          >
+            Đặt hàng ngay
           </Button>
         </CardContent>
       </Card>
+
     </aside>
   )
 }

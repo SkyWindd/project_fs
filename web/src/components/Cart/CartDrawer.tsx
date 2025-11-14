@@ -1,10 +1,12 @@
 import React, { useEffect } from "react"
 import { X } from "lucide-react"
 import { Button } from "../ui/button"
+import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import { useCart } from "../../context/CartContext"
 import CartItemCard from "./CartItemCard"
 import { useNavigate, useLocation } from "react-router-dom"
+import { useAuth } from "../../context/AuthContext"
 interface CartDrawerProps {
   open: boolean
   onClose: () => void
@@ -14,7 +16,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { cartItems, removeFromCart, clearCart } = useCart()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-
+  const { currentUser } = useAuth()
   // ✅ Ẩn Cart khi sang trang checkout
   useEffect(() => {
     if (pathname === "/checkout" && open) {
@@ -109,18 +111,33 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                   </button>
                 </div>
 
-                <Button
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white text-[15px] py-3 rounded-lg font-semibold shadow-md transition active:scale-95"
-                  onClick={() =>
+               <Button
+                  className="
+                    w-full bg-orange-500 hover:bg-orange-600 text-white text-[15px] py-3 
+                    rounded-lg font-semibold shadow-md transition active:scale-95
+                  "
+                  onClick={() => {
+                    if (!currentUser) {
+                      toast.error("Vui lòng đăng nhập để tiếp tục thanh toán 🔒", {
+                        duration: 3000,
+                      })
+
+                      onClose() // đóng giỏ hàng cho gọn UI
+                      navigate("/auth?tab=login")
+                      return
+                    }
+
+                    // Nếu đã đăng nhập → cho checkout
                     navigate("/checkout", {
-                    state: { cartItems, subtotal, total },
+                      state: { cartItems, subtotal, total },
                     })
-                }
+                  }}
                 >
                   Thanh Toán
                 </Button>
               </div>
             )}
+
           </motion.div>
         </>
       )}

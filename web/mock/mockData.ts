@@ -1,8 +1,3 @@
-// ========================================
-// 🍕 MOCK DATA - FOOD DRONE DELIVERY APP
-// Compatible with PostgreSQL schema v1.1
-// Author: Quân Nguyễn + GPT
-// ========================================
 
 // ---------- INTERFACES ----------
 
@@ -11,6 +6,7 @@ export interface User {
   full_name: string;
   email: string;
   phone_number: string;
+  password: string;
   role: "admin" | "customer";
   is_active: boolean;
   created_at: string;
@@ -69,7 +65,7 @@ export interface DroneStatus {
 
 export interface Order {
   order_id: number;
-  customer_id: number;
+  user_id: number;
   address_id: number;
   drone_id: number;
   total_amount: number;
@@ -93,7 +89,7 @@ export interface OrderDetail {
 export interface Payment {
   payment_id: number;
   order_id: number;
-  payment_method: "cash" | "credit_card" | "momo" | "zalopay" | "paypal";
+  payment_method:  "banking" | "momo" | "vnpay";
   amount: number;
   provider_transaction_id: string;
   status: "pending" | "success" | "failed" | "refunded";
@@ -120,6 +116,7 @@ export const mockUsers: User[] = [
     full_name: "Nguyễn Quân",
     email: "quan.nguyen@example.com",
     phone_number: "0987123456",
+    password: "123456",
     role: "customer",
     is_active: true,
     created_at: "2025-11-09T10:00:00Z",
@@ -130,6 +127,7 @@ export const mockUsers: User[] = [
     full_name: "Admin System",
     email: "admin@example.com",
     phone_number: "0912345678",
+    password: "123456",
     role: "admin",
     is_active: true,
     created_at: "2025-11-09T10:00:00Z",
@@ -174,55 +172,55 @@ export const mockMenuItems: MenuItem[] = [
   // 🍕 PIZZA
   {
     item_id: 1,
-    name: "Pizza Hải sản",
+    name: "Pizza Hải Sản Sốt Pesto",
     category_id: 1,
-    description: "Pizza tôm mực phô mai thơm ngon",
+    description: "Tôm, mực, nghêu, nấm, xốt pesto truyền thống đặc trưng",
     price: 159000,
-    image_url: "/pizza/PizzaHaiSan.webp",
+    image_url: "/pizza/PizzaHaiSanSotPesto.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 2,
-    name: "Pizza Bò phô mai",
+    name: "Pizza Bò Sốt Cay Hàn Quốc",
     category_id: 1,
-    description: "Pizza thịt bò và phô mai béo ngậy",
+    description: "Hương vị thịt bò Úc thượng hạng, thơm hòa quyện xốt cay Hàn Quốc nồng nàn, phủ rau mầm và mè rang",
     price: 169000,
-    image_url: "/pizza/PizzaBoPhoMai.webp",
+    image_url: "/pizza/PizzaBoSotCayHQ.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 3,
-    name: "Pizza Gà BBQ",
+    name: "Pizza Thập Cẩm",
     category_id: 1,
-    description: "Pizza gà nướng BBQ với nước sốt đậm đà",
+    description: "Pepperoni, thịt bò, thịt xông khói, giăm bông, nấm, hành tây, ớt chuông, xốt cà chua, thơm.",
     price: 149000,
-    image_url: "/pizza/PizzaGaBBQ.webp",
+    image_url: "/pizza/PizzaThapCam.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 4,
-    name: "Pizza Rau củ",
+    name: "Pizza Phô Mai Cao Cấp",
     category_id: 1,
-    description: "Pizza chay rau củ tươi ngon, thanh vị",
+    description: "Phô mai Mozzarella, mật ong, xốt cà chua. Ngon hơn với mật ong.",
     price: 139000,
-    image_url: "/pizza/PizzaRauCu.webp",
+    image_url: "/pizza/PizzaPhoMaiCaoCap.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 5,
-    name: "Pizza Xúc xích Đức",
+    name: "Pizza Hawaiian",
     category_id: 1,
-    description: "Pizza xúc xích Đức và phô mai tan chảy",
+    description: "Giăm bông và thơm ngọt dịu trên nền xốt cà chua truyền thống và phô mai mozzarella",
     price: 159000,
-    image_url: "/pizza/PizzaXucXichDuc.webp",
+    image_url: "/pizza/PizzaHawaiian.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
@@ -235,40 +233,40 @@ export const mockMenuItems: MenuItem[] = [
     category_id: 2,
     description: "Khoai tây chiên giòn rụm, vàng ươm",
     price: 39000,
-    image_url: "/sides/FrenchFries.webp",
+    image_url: "/sides/KhoaiTayChien.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 7,
-    name: "Gà viên chiên",
+    name: "Mực chiên giòn",
     category_id: 2,
-    description: "Gà viên chiên xù giòn tan, thơm ngon",
+    description: "Mực khoanh tẩm bột chiên giòn",
     price: 49000,
-    image_url: "/sides/ChickenBalls.webp",
+    image_url: "/sides/MucChienGion.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 8,
-    name: "Khoai tây lắc phô mai",
+    name: "Khoai tây chiên lắc phô mai",
     category_id: 2,
-    description: "Khoai tây chiên lắc phô mai thơm ngậy",
+    description: "Khoai tây chiên & bột phô mai cheddar",
     price: 45000,
-    image_url: "/sides/CheeseFries.webp",
+    image_url: "/sides/KhoaiTayChienLacPhoMai.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 9,
-    name: "Salad trộn dầu giấm",
+    name: "Phô mai chiên giòn",
     category_id: 2,
-    description: "Salad tươi mát với dầu giấm chua dịu",
+    description: "Phô mai chiên giòn",
     price: 59000,
-    image_url: "/sides/Salad.webp",
+    image_url: "/sides/PhoMaiChienGion.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
@@ -277,9 +275,9 @@ export const mockMenuItems: MenuItem[] = [
     item_id: 10,
     name: "Bánh mì bơ tỏi",
     category_id: 2,
-    description: "Bánh mì nướng giòn với bơ tỏi thơm lừng",
+    description: "Bánh mì nướng giòn cùng bơ tỏi",
     price: 35000,
-    image_url: "/sides/GarlicBread.webp",
+    image_url: "/sides/BanhMiBoToi.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
@@ -288,55 +286,55 @@ export const mockMenuItems: MenuItem[] = [
   // 🧃 ĐỒ UỐNG
   {
     item_id: 11,
-    name: "Trà Chanh Tươi",
+    name: "Aquafina 500ml",
     category_id: 3,
-    description: "Trà chanh tươi mát lạnh, giải khát sảng khoái",
-    price: 29000,
-    image_url: "/drinks/TraChanh.webp",
+    description: "Aquafina 500ml",
+    price: 20000,
+    image_url: "/drinks/AQUAFINA_500ML.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 12,
-    name: "Coca-Cola",
+    name: "Pepsi Không Calo Lon 320ml",
     category_id: 3,
-    description: "Coca-Cola lon 330ml mát lạnh",
-    price: 19000,
-    image_url: "/drinks/CocaCola.webp",
+    description: "Pepsi Không Calo Lon 320ml",
+    price: 35000,
+    image_url: "/drinks/PEPSI_NOCALO_320ML.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 13,
-    name: "Pepsi",
+    name: "Pepsi Lon 320ml",
     category_id: 3,
-    description: "Pepsi lon 330ml, vị đậm đà sảng khoái",
-    price: 19000,
-    image_url: "/drinks/Pepsi.webp",
+    description: "Pepsi Lon 320ml",
+    price: 35000,
+    image_url: "/drinks/PEPSI_320ML.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 14,
-    name: "Nước Cam Ép",
+    name: "7Up Lon 320ml",
     category_id: 3,
-    description: "Nước cam ép nguyên chất, mát lạnh",
+    description: "7Up Lon 320ml",
     price: 35000,
-    image_url: "/drinks/OrangeJuice.webp",
+    image_url: "/drinks/7UP_320ML.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
   },
   {
     item_id: 15,
-    name: "Trà Sữa Trân Châu",
+    name: "Mirinda Orange Lon 320ml",
     category_id: 3,
-    description: "Trà sữa trân châu béo ngậy, mát lạnh",
-    price: 45000,
-    image_url: "/drinks/TraSuaTranChau.webp",
+    description: "Mirinda Orange Lon 320ml",
+    price: 35000,
+    image_url: "/drinks/MIRINDA_ORANGE_320ML.webp",
     is_available: true,
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T10:00:00Z",
@@ -377,8 +375,8 @@ export const mockDroneStatus: DroneStatus[] = [
   {
     status_id: 2,
     drone_id: 2,
-    current_latitude: 10.754222,
-    current_longitude: 106.667778,
+    current_latitude: 10.77653,
+    current_longitude: 106.700981,
     battery_level: 60,
     availability: "busy",
     current_order_id: 1,
@@ -389,7 +387,7 @@ export const mockDroneStatus: DroneStatus[] = [
 export const mockOrders: Order[] = [
   {
     order_id: 1,
-    customer_id: 1,
+    user_id: 1,
     address_id: 1,
     drone_id: 1,
     total_amount: 188000,
@@ -402,7 +400,7 @@ export const mockOrders: Order[] = [
   },
   {
     order_id: 2,
-    customer_id: 1,
+    user_id: 1,
     address_id: 2,
     drone_id: 2,
     total_amount: 89000,
@@ -434,9 +432,9 @@ export const mockPayments: Payment[] = [
   {
     payment_id: 2,
     order_id: 2,
-    payment_method: "cash",
+    payment_method: "banking",
     amount: 94000,
-    provider_transaction_id: "CASH_002",
+    provider_transaction_id: "BANKING_002",
     status: "pending",
     transaction_time: "2025-11-09T14:45:00Z",
   },
@@ -458,12 +456,12 @@ export const mockTracking: Tracking[] = [
     tracking_id: 2,
     order_id: 2,
     drone_id: 2,
-    latitude: 10.754222,
-    longitude: 106.667778,
+    latitude: 10.849112,
+    longitude: 106.768520,
     altitude: 95.3,
     speed: 38.0,
     status: "enroute",
-    timestamp: "2025-11-09T14:50:00Z",
+    timestamp: "2025-11-09T14:50:00Z"
   },
 ];
 

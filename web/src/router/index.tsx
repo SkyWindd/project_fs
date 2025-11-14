@@ -7,11 +7,12 @@ import MainLayout from "../layout/MainLayout"
 import Home from "../pages/Home"
 import Checkout from "../pages/Checkout"
 import NotFound from "../pages/NotFound"
-
+import AuthPage from "../pages/AuthPage"
+import Profile from "../pages/Profile"
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />, // Layout chung có Header, Footer
+    element: <MainLayout />, // ✅ Tất cả các trang con sẽ có header/footer
     children: [
       {
         index: true,
@@ -22,9 +23,17 @@ export const router = createBrowserRouter([
         element: <Checkout />,
       },
       {
-        path: "*",
-        element: <NotFound />,
+        path: "auth", // ✅ Trang login/register nằm trong layout
+        element: <AuthPage />,
       },
+      {
+        path: "/profile",
+        element: <Profile />,
+      }
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ])

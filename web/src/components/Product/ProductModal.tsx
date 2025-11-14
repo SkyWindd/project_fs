@@ -24,6 +24,7 @@ export default function ProductModal({
     description?: string
     price: number
     image_url?: string
+    category_id: number 
   }
 }) {
   const { addToCart } = useCart() // ✅ Lấy hàm thêm giỏ hàng từ Context
@@ -56,6 +57,7 @@ export default function ProductModal({
       quantity,
       price: product.price + sizePrice + crustPrice,
       image_url: product.image_url || "/images/placeholder.jpg",
+      category_id: product.category_id,
     })
 
     console.log("🛒 Đã thêm vào giỏ:", product.name)
@@ -94,74 +96,74 @@ export default function ProductModal({
                 <p className="text-orange-600 font-bold text-xl">
                   {product.price.toLocaleString()}₫
                 </p>
-
+              
                 {/* ⚙️ Kích thước */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-800 mb-2">
-                    Kích thước
-                  </h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { key: "small", label: "Nhỏ", note: "-20.000₫" },
-                      { key: "medium", label: "Vừa", note: "Chuẩn" },
-                      { key: "large", label: "Lớn", note: "+30.000₫" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.key}
-                        onClick={() =>
-                          setSize(opt.key as "small" | "medium" | "large")
-                        }
-                        className={`flex flex-col justify-center items-center rounded-md border py-2 text-sm font-medium transition ${
-                          size === opt.key
-                            ? "bg-orange-500 text-white border-orange-500"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                        <span
-                          className={`text-xs ${
+               {product.category_id === 1 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                      Kích thước
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[ 
+                        { key: "small", label: "Nhỏ", note: "-20.000₫" },
+                        { key: "medium", label: "Vừa", note: "Chuẩn" },
+                        { key: "large", label: "Lớn", note: "+30.000₫" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.key}
+                          onClick={() => setSize(opt.key as "small" | "medium" | "large")}
+                          className={`flex flex-col justify-center items-center rounded-md border py-2 text-sm font-medium transition ${
                             size === opt.key
-                              ? "text-orange-50"
-                              : "text-gray-500"
+                              ? "bg-orange-500 text-white border-orange-500"
+                              : "border-gray-300 text-gray-700 hover:bg-gray-50"
                           }`}
                         >
-                          {opt.note}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 🍞 Đế bánh */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-800 mb-2">
-                    Đế bánh
-                  </h3>
-                  <div className="space-y-2">
-                    {[
-                      { id: "classic", label: "Đế kéo tay truyền thống", extra: 0 },
-                      { id: "cheese", label: "Viền phô mai", extra: 25000 },
-                      { id: "sausage", label: "Viền xúc xích", extra: 25000 },
-                    ].map((option) => (
-                      <button
-                        key={option.id}
-                        onClick={() => setCrust(option.id)}
-                        className={`w-full text-left px-4 py-2 rounded-md border text-sm flex justify-between items-center transition ${
-                          crust === option.id
-                            ? "border-orange-500 bg-orange-50 text-gray-900"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>{option.label}</span>
-                        {option.extra > 0 && (
-                          <span className="text-gray-500 text-xs">
-                            +{option.extra.toLocaleString()}₫
+                          <span>{opt.label}</span>
+                          <span
+                            className={`text-xs ${
+                              size === opt.key ? "text-orange-50" : "text-gray-500"
+                            }`}
+                          >
+                            {opt.note}
                           </span>
-                        )}
-                      </button>
-                    ))}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+
+               {product.category_id === 1 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                      Đế bánh
+                    </h3>
+                    <div className="space-y-2">
+                      {[
+                        { id: "classic", label: "Đế kéo tay truyền thống", extra: 0 },
+                        { id: "cheese", label: "Viền phô mai", extra: 25000 },
+                        { id: "sausage", label: "Viền xúc xích", extra: 25000 },
+                      ].map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => setCrust(option.id)}
+                          className={`w-full text-left px-4 py-2 rounded-md border text-sm flex justify-between items-center transition ${
+                            crust === option.id
+                              ? "border-orange-500 bg-orange-50 text-gray-900"
+                              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <span>{option.label}</span>
+                          {option.extra > 0 && (
+                            <span className="text-gray-500 text-xs">
+                              +{option.extra.toLocaleString()}₫
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* ✏️ Ghi chú */}
                 <div>

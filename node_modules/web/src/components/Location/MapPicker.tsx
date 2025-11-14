@@ -16,8 +16,9 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 })
 
-interface MapPickerProps {
-  onSelectLocation: (address: string) => void
+/* ✅ Cập nhật interface — onSelectLocation trả về 3 giá trị */
+export interface MapPickerProps {
+  onSelectLocation: (address: string, lat: number, lon: number) => void
   onClose: () => void
 }
 
@@ -51,7 +52,7 @@ export default function MapPicker({ onSelectLocation, onClose }: MapPickerProps)
   const [loading, setLoading] = useState(false)
   const [loadingGPS, setLoadingGPS] = useState(false)
 
-  // Gọi API lấy địa chỉ khi position thay đổi
+  // 🗺️ Lấy địa chỉ từ toạ độ
   useEffect(() => {
     const fetchAddress = async () => {
       setLoading(true)
@@ -70,10 +71,10 @@ export default function MapPicker({ onSelectLocation, onClose }: MapPickerProps)
     fetchAddress()
   }, [position])
 
-  // 📍 Lấy vị trí hiện tại và di chuyển map đến đó
+  // 📍 Lấy vị trí GPS hiện tại
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("Trình duyệt của bạn không hỗ trợ định vị GPS.")
+      alert("Trình duyệt không hỗ trợ định vị GPS.")
       return
     }
 
@@ -87,14 +88,19 @@ export default function MapPicker({ onSelectLocation, onClose }: MapPickerProps)
       },
       (err) => {
         console.error(err)
-        alert("Không thể lấy vị trí hiện tại của bạn.")
+        alert("Không thể lấy vị trí của bạn.")
         setLoadingGPS(false)
       }
     )
   }
 
+  // ✅ Trả về 3 giá trị: address, lat, lon
   const handleConfirm = () => {
-    onSelectLocation(address)
+    if (!address.trim()) {
+      alert("Vui lòng chọn vị trí trước khi xác nhận.")
+      return
+    }
+    onSelectLocation(address, position.lat, position.lng)
     onClose()
   }
 
@@ -127,16 +133,13 @@ export default function MapPicker({ onSelectLocation, onClose }: MapPickerProps)
           <FlyToMarker position={position} />
         </MapContainer>
 
-        {/* Overlay hộp chọn địa chỉ */}
+        {/* Overlay chọn địa chỉ */}
         <div className="absolute left-4 top-4 bg-white shadow-xl rounded-xl p-4 w-[340px] z-[2000] border border-gray-100">
-          <h3 className="font-semibold text-sm mb-1">
-            Chọn địa chỉ của bạn để giao hàng
-          </h3>
+          <h3 className="font-semibold text-sm mb-1">Chọn địa chỉ của bạn để giao hàng</h3>
           <p className="text-xs text-gray-500 mb-3">
             Kéo hoặc click để chọn vị trí chính xác
           </p>
 
-          {/* ✅ Ô nhập địa chỉ + nút GPS thẳng hàng */}
           <div className="relative mb-3">
             <Input
               value={address}
@@ -164,7 +167,7 @@ export default function MapPicker({ onSelectLocation, onClose }: MapPickerProps)
             className="w-full bg-red-600 hover:bg-red-700 text-white"
             disabled={!address || loading}
           >
-            Bắt đầu đặt hàng
+            Xác nhận vị trí
           </Button>
 
           <Button

@@ -81,9 +81,11 @@ export default function CartItemCard({ item }: { item: any }) {
               <p className="font-semibold text-sm text-gray-900 leading-tight">
                 {item.name}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Cỡ: {item.size} • Đế: {item.crust}
-              </p>
+              {(item.category_id === 1) && (
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Cỡ: {item.size} • Đế: {item.crust}
+                </p>
+              )}
             </div>
 
             {/* ✅ Cột giá + nút X */}

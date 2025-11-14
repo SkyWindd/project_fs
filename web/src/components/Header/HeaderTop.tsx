@@ -1,13 +1,13 @@
-import { useState } from "react"
 import { Link } from "react-router-dom"
 import LocationSelector from "../Location/LocationSelector"
 import CartIcon from "./CartIcon"
 import UserMenu from "./UserMenu"
 import { useResponsive } from "../../hooks/useResponsive"
-import { useCart } from "../../context/CartContext" // ✅ Import context
+import { useCart } from "../../context/CartContext"
+
 export default function HeaderTop({ scrolled }: { scrolled: boolean }) {
-  const [userLocation, setUserLocation] = useState<string>("")
   const { isMobile } = useResponsive()
+  const { cartItems } = useCart()
 
   return (
     <div
@@ -21,9 +21,8 @@ export default function HeaderTop({ scrolled }: { scrolled: boolean }) {
           isMobile ? "min-w-[40px]" : "min-w-[140px] max-w-[230px]"
         }`}
       >
-        <div className="flex items-center gap-2 cursor-pointer">
-          <LocationSelector onConfirm={(addr) => setUserLocation(addr)} />
-        </div>
+        {/* ✅ Chỉ render 1 component LocationSelector — không cần hiển thị lại address */}
+        <LocationSelector />
       </div>
 
       {/* Logo giữa */}
@@ -31,9 +30,7 @@ export default function HeaderTop({ scrolled }: { scrolled: boolean }) {
         <Link to="/" className="flex items-center gap-2">
           <h1
             className={`font-bold tracking-wider font-[Birthstone] text-red-600 transition-all duration-300 ${
-              scrolled
-                ? "text-lg md:text-xl"
-                : "text-xl md:text-2xl"
+              scrolled ? "text-lg md:text-xl" : "text-xl md:text-2xl"
             }`}
           >
             PIZZAHOUSE

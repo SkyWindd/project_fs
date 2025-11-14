@@ -16,6 +16,7 @@
     "shared"
   ],
   "dependencies": {
-    "framer-motion": "^12.23.24"
+    "framer-motion": "^12.23.24",
+    "zod": "^4.1.12"
   }
 }

@@ -4,6 +4,8 @@ import { Button } from "../ui/button"
 import { Plus } from "lucide-react"
 import { motion } from "framer-motion"
 import ProductModal from "./ProductModal"
+import { toast } from "sonner"
+import { useLocationContext } from "../../context/LocationContext" // ✅ import context
 
 interface ProductCardProps {
   product: {
@@ -12,12 +14,23 @@ interface ProductCardProps {
     image_url?: string
     price: number
     description?: string
+    category_id: number
   }
   index?: number
 }
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [open, setOpen] = useState(false)
+  const { fullAddress } = useLocationContext() // ✅ lấy địa chỉ hiện tại
+
+ const handleOpenModal = () => {
+  if (!fullAddress) {
+    toast.warning("Vui lòng chọn địa chỉ giao hàng trước khi chọn món 🍕")
+    window.dispatchEvent(new Event("open-location-modal")) // ✅ Mở LocationSelector
+    return
+  }
+  setOpen(true)
+} 
 
   return (
     <>
@@ -52,7 +65,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               <Button
                 size="icon"
                 className="bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-md w-9 h-9 active:scale-95 transition"
-                onClick={() => setOpen(true)}
+                onClick={handleOpenModal} // ✅ Kiểm tra trước khi mở
               >
                 <Plus size={18} />
               </Button>
@@ -63,7 +76,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
       {/* Modal chi tiết sản phẩm */}
       {open && (
-        <ProductModal open={open} onClose={() => setOpen(false)} product={product} />
+        <ProductModal
+          open={open}
+          onClose={() => setOpen(false)}
+          product={product}
+        />
       )}
     </>
   )

@@ -131,4 +131,19 @@ button{
   body {
     @apply bg-background text-foreground;
   }
+  .leaflet-pane,
+  .leaflet-top,
+  .leaflet-bottom {
+    z-index: 10 !important;
+  }
+
+  header, .header, #header {
+    z-index: 50 !important;
+    position: relative;
+    
+  }
+  .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+}
 }
