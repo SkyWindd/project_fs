@@ -13,9 +13,6 @@ COPY web/package*.json ./
 # Cài đặt dependencies (cache lại npm layer)
 RUN --mount=type=cache,target=/root/.npm npm install
 
-# Copy toàn bộ mã nguồn web
-COPY web/ ./
-
 # Build Vite project (tạo ra thư mục dist)
 RUN npm run build
 

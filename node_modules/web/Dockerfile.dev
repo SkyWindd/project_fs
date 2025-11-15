@@ -1,19 +1,17 @@
-# web/Dockerfile.dev
 # syntax=docker/dockerfile:1.4
 FROM node:20-bookworm
 
 WORKDIR /app
 
-# Copy package.json và package-lock.json để tận dụng cache layer
-COPY web/package*.json ./
+# Copy package files
+COPY package*.json ./
 
-# Cài đặt dependencies và cache npm layer
+# Install dependencies with cache
 RUN --mount=type=cache,target=/root/.npm npm install
 
-# Copy toàn bộ source code sau khi dependencies đã cache
-COPY web/ ./
+# Copy full source code
+COPY . .
 
 EXPOSE 5173
 
-# Sử dụng dev server (Vite) để hot reload
 CMD ["npm", "run", "dev"]

@@ -1,4 +1,4 @@
-name: CI/CD for Monorepo
+name: Web CI/CD
 
 on:
   push:
@@ -7,11 +7,11 @@ on:
     branches: [ main ]
 
 jobs:
-  setup-and-test:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Lấy code
+      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -21,34 +21,23 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
+          cache-dependency-path: web/package-lock.json
 
-      # 3️⃣ Cài dependencies tại root (tự động cài cho tất cả workspace)
-      - name: Install dependencies
+      # 3️⃣ Install dependencies for WEB
+      - name: Install web dependencies
+        working-directory: ./web
         run: npm install
 
-      # 4️⃣ Build module web
-      - name: Build web app
+      # 4️⃣ Build WEB
+      - name: Build web application
         working-directory: ./web
-        run: |
-          if [ -f package.json ]; then
-            echo "Building web..."
-            npm run build || echo "No build script found in web"
-          fi
+        run: npm run build
 
-      # 5️⃣ Build module mobile
-      - name: Build mobile app
-        working-directory: ./mobile
-        run: |
-          if [ -f package.json ]; then
-            echo "Building mobile..."
-            npm run build || echo "No build script found in mobile"
-          fi
-
-      # 6️⃣ (Tuỳ chọn) Deploy web
-      - name: Deploy web to Vercel
+      # 5️⃣ Deploy WEB → Vercel
+      - name: Deploy to Vercel
         if: github.ref == 'refs/heads/main'
         working-directory: ./web
         run: |
-          if [ -f package.json ]; then
-            npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
-          fi
+          npx vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
+          npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
