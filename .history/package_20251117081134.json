@@ -1,0 +1,25 @@
+{
+  "name": "project_fs",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "web",
+    "mobile",
+    "shared"
+  ],
+  "dependencies": {
+    "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-label": "^2.1.8",
+    "framer-motion": "^12.23.24",
+    "sonner": "^2.0.7",
+    "zod": "^4.1.12"
+  }
+}
