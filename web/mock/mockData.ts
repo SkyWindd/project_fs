@@ -31,17 +31,19 @@ export interface Category {
   category_name: string;
 }
 
-export interface MenuItem {
-  item_id: number;
-  name: string;
-  category_id: number;
-  description: string;
-  price: number;
-  image_url: string;
-  is_available: boolean;
-  created_at: string;
-  updated_at: string;
+export interface MenuItem { 
+  item_id: number; 
+  name: string; 
+  category_id: number; 
+  description: string; 
+  price: number; 
+  image_url: string; 
+  is_available: boolean; 
+  created_at: string; 
+  updated_at: string; 
 }
+
+ 
 
 export interface Drone {
   drone_id: number;
