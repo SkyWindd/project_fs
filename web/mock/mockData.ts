@@ -108,6 +108,30 @@ export interface Tracking {
   timestamp: string;
 }
 
+// Interface lưu thông tin cửa hàng/chi nhánh
+export interface Store {
+  store_id: number;
+  store_name: string;
+  address: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  phone_number: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Interface liên kết cửa hàng với các món ăn có sẵn
+export interface StoreMenuItem {
+  store_id: number;
+  item_id: number;
+  is_available: boolean; // món ăn này có sẵn tại chi nhánh hay không
+  price_override?: number; // nếu cửa hàng muốn thay đổi giá món ăn riêng
+  created_at: string;
+  updated_at: string;
+}
+
 // ---------- MOCK DATA ----------
 
 export const mockUsers: User[] = [
