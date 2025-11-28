@@ -31,17 +31,19 @@ export interface Category {
   category_name: string;
 }
 
-export interface MenuItem {
-  item_id: number;
-  name: string;
-  category_id: number;
-  description: string;
-  price: number;
-  image_url: string;
-  is_available: boolean;
-  created_at: string;
-  updated_at: string;
+export interface MenuItem { 
+  item_id: number; 
+  name: string; 
+  category_id: number; 
+  description: string; 
+  price: number; 
+  image_url: string; 
+  is_available: boolean; 
+  created_at: string; 
+  updated_at: string; 
 }
+
+ 
 
 export interface Drone {
   drone_id: number;
@@ -106,6 +108,30 @@ export interface Tracking {
   speed: number;
   status: "enroute" | "delivered" | "returning" | "error";
   timestamp: string;
+}
+
+// Interface lưu thông tin cửa hàng/chi nhánh
+export interface Store {
+  store_id: number;
+  store_name: string;
+  address: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  phone_number: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Interface liên kết cửa hàng với các món ăn có sẵn
+export interface StoreMenuItem {
+  store_id: number;
+  item_id: number;
+  is_available: boolean; // món ăn này có sẵn tại chi nhánh hay không
+  price_override?: number; // nếu cửa hàng muốn thay đổi giá món ăn riêng
+  created_at: string;
+  updated_at: string;
 }
 
 // ---------- MOCK DATA ----------
