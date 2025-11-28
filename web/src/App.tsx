@@ -3,11 +3,12 @@ import { router } from "./router"
 import { LocationProvider } from "./context/LocationContext"
 import { Toaster } from "sonner"
 import { AuthProvider } from "./context/AuthContext"
-
+import { CategoryProvider } from "./context/CategoryContext"   // ⭐ THÊM DÒNG NÀY
+import { MenuProvider } from "./context/MenuContext"
 export default function App() {
   return (
     <>
-      {/* ✅ Toast thông báo toàn app */}
+      {/* Toast toàn app */}
       <Toaster
         position="top-center"
         richColors
@@ -15,10 +16,14 @@ export default function App() {
         style={{ zIndex: 99999 }}
       />
 
-      {/* ✅ Bao toàn bộ router trong các provider */}
+      {/* ⭐ Bao toàn bộ Router bằng tất cả Provider cần thiết */}
       <AuthProvider>
         <LocationProvider>
-          <RouterProvider router={router} />
+          <CategoryProvider>     
+             <MenuProvider>
+                <RouterProvider router={router} />
+             </MenuProvider>
+          </CategoryProvider>
         </LocationProvider>
       </AuthProvider>
     </>

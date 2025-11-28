@@ -2,9 +2,11 @@ import React from "react"
 import { useOutletContext } from "react-router-dom"
 import Banner from "../components/Home/Banner"
 import ProductGrid from "../components/Home/ProductGrid"
-import mockData from "../../mock/mockData"
 import { motion, AnimatePresence } from "framer-motion"
 import type { Variants } from "framer-motion"
+
+import { useMenu } from "../context/MenuContext"
+import { useCategories } from "../context/CategoryContext"
 
 interface ContextType {
   selectedCategory: string
@@ -13,26 +15,31 @@ interface ContextType {
 export default function Home() {
   const { selectedCategory } = useOutletContext<ContextType>()
 
-  // ✅ Lấy dữ liệu từ mockData
-  const products = mockData.menuitems
-  const categories = mockData.categories
+  // ⭐ Lấy dữ liệu thật từ backend
+  const { menuItems, loading: loadingMenu } = useMenu()
+  const { categories, loading: loadingCategories } = useCategories()
 
-  // ✅ Lọc sản phẩm theo danh mục
+  // Chờ dữ liệu
+  if (loadingMenu || loadingCategories) {
+    return (
+      <div className="text-center py-10 text-gray-600">
+        Đang tải dữ liệu thực từ cửa hàng...
+      </div>
+    )
+  }
+
+  // ⭐ Lọc theo category theo ID
+  const selectedCat = categories.find(
+    (c) =>
+      c.category_name.toLowerCase() === selectedCategory.toLowerCase()
+  )
+
   const filteredProducts =
     selectedCategory === "Tất cả"
-      ? products
-      : products.filter((p) => {
-          const category = categories.find(
-            (c) => c.category_id === p.category_id
-          )
-          return (
-            category &&
-            category.category_name.toLowerCase() ===
-              selectedCategory.toLowerCase()
-          )
-        })
+      ? menuItems
+      : menuItems.filter((p) => p.category_id === selectedCat?.category_id)
 
-  // ✅ Animation
+  // ⭐ Animation
   const fadeVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -49,14 +56,14 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-orange-50 to-white">
-      {/* 🔶 Banner */}
+      {/* Banner */}
       <div className="mb-10">
         <Banner />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pb-12 space-y-16">
         <AnimatePresence mode="wait">
-          {/* 🔹 Khi chọn 1 danh mục cụ thể */}
+          {/* 🔹 Khi chọn category cụ thể */}
           {selectedCategory !== "Tất cả" ? (
             <motion.div
               key={selectedCategory}
@@ -74,7 +81,7 @@ export default function Home() {
               <ProductGrid products={filteredProducts} />
             </motion.div>
           ) : (
-            /* 🔹 Khi chọn “Tất cả” => hiển thị từng nhóm danh mục */
+            // 🔹 Khi chọn tất cả → hiển thị theo từng category
             <motion.div
               key="all-categories"
               variants={fadeVariants}
@@ -84,17 +91,21 @@ export default function Home() {
               className="space-y-12"
             >
               {categories.map((cat) => {
-                const items = products.filter(
+                const items = menuItems.filter(
                   (p) => p.category_id === cat.category_id
                 )
                 if (items.length === 0) return null
+
                 return (
                   <motion.div
                     key={cat.category_id}
                     variants={fadeVariants}
                     initial="hidden"
                     animate="visible"
-                    transition={{ duration: 0.3, delay: cat.category_id * 0.05 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: cat.category_id * 0.05,
+                    }}
                     className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6 hover:shadow-lg transition"
                   >
                     <div className="flex items-center justify-between mb-6">

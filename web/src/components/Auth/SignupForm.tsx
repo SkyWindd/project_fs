@@ -11,11 +11,10 @@ import { Field, FieldGroup, FieldLabel, FieldError } from "../ui/field"
 import { toast } from "sonner"
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { mockUsers } from "../../../mock/mockData"
-import type { User as UserType } from "../../../mock/mockData"
-import { useAuth } from "../../context/AuthContext" // ✅ Context đăng nhập
+import { useAuth } from "../../context/AuthContext"
+import { registerUser } from "../../lib/api"   // ⬅ API đăng ký
 
-// ✅ Kiểm tra form bằng Zod
+// 📌 Schema validation bằng Zod
 const signupSchema = z
   .object({
     name: z.string().min(2, "Tên phải ít nhất 2 ký tự"),
@@ -24,7 +23,7 @@ const signupSchema = z
     confirmPassword: z.string().min(6, "Xác nhận mật khẩu phải ít nhất 6 ký tự"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Mật khẩu và xác nhận mật khẩu không khớp",
+    message: "Mật khẩu và xác nhận không khớp",
     path: ["confirmPassword"],
   })
 
@@ -42,40 +41,28 @@ export default function SignupForm() {
   })
 
   const navigate = useNavigate()
-  const { login } = useAuth() // ✅ Lấy hàm login từ context
+  const { login } = useAuth()
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const onSubmit = (data: SignupFormValues) => {
-    const existingUser = mockUsers.find((u) => u.email === data.email)
-    if (existingUser) {
-      toast.error("Email này đã được đăng ký trước đó ❌")
-      return
+  // 🟦 Hàm submit
+  const onSubmit = async (data: SignupFormValues) => {
+    try {
+      const res = await registerUser({
+        full_name: data.name,
+        email: data.email,
+        password: data.password,
+      })
+
+      // res.user = user thật từ MongoDB
+      login(res.user)
+      toast.success(`Tạo tài khoản thành công! Xin chào ${res.user.full_name} 🎉`)
+
+      setTimeout(() => navigate("/"), 1000)
+    } catch (err: any) {
+      toast.error(err.message || "Đăng ký thất bại ❌")
     }
-
-    // ✅ Tạo user mới
-    const newUser: UserType = {
-      user_id: mockUsers.length + 1,
-      full_name: data.name,
-      email: data.email,
-      phone_number: "",
-      password: data.password,
-      role: "customer",
-      is_active: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-
-    // ✅ Giả lập lưu user mới (mock local)
-    const updatedUsers = [...mockUsers, newUser]
-    localStorage.setItem("mockUsers", JSON.stringify(updatedUsers))
-
-    // ✅ Đăng nhập user vừa tạo (qua context)
-    login(newUser)
-    toast.success(`Chào mừng ${newUser.full_name}! 🎉`)
-
-    setTimeout(() => navigate("/"), 1000)
   }
 
   return (
@@ -92,6 +79,7 @@ export default function SignupForm() {
       <CardContent className="space-y-6 pt-4 pb-6 px-2 sm:px-4">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FieldGroup>
+            
             {/* Họ & Tên */}
             <Field>
               <FieldLabel htmlFor="name">Họ & tên</FieldLabel>
@@ -141,14 +129,10 @@ export default function SignupForm() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((p) => !p)}
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {form.formState.errors.password && (
@@ -170,7 +154,7 @@ export default function SignupForm() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword((p) => !p)}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showConfirmPassword ? (
@@ -181,11 +165,10 @@ export default function SignupForm() {
                 </button>
               </div>
               {form.formState.errors.confirmPassword && (
-                <FieldError>
-                  {form.formState.errors.confirmPassword.message}
-                </FieldError>
+                <FieldError>{form.formState.errors.confirmPassword.message}</FieldError>
               )}
             </Field>
+
           </FieldGroup>
 
           <Button

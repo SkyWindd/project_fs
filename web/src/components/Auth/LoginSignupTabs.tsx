@@ -23,7 +23,7 @@ export default function LoginSignupTabs() {
           bg-white border border-gray-100 rounded-3xl shadow-lg
           px-6 sm:px-10 py-8 sm:py-10
           transition-all duration-300
-          hover:shadow-2xl hover:-translate-y-[2px]
+          hover:shadow-2xl hover:-translate-y-0.5
           backdrop-blur-md
         "
       >

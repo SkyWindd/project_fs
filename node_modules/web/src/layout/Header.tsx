@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useResponsive } from "../hooks/useResponsive"
-import mockData from "../../mock/mockData" // ✅ Import đúng kiểu export default
+import { useCategories } from "../context/CategoryContext"   // ⭐ Lấy categories từ DB
 import HeaderTop from "../components/Header/HeaderTop"
 import HeaderBottom from "../components/Header/HeaderBottom"
 
@@ -13,7 +13,7 @@ interface HeaderProps {
 
 export default function Header({ selectedCategory, onSelectCategory }: HeaderProps) {
   const [showSearch, setShowSearch] = useState(false)
-  const [categories, setCategories] = useState<typeof mockData.categories>([])
+  const { categories, loading } = useCategories()
   const { isMobile } = useResponsive()
   const [scrolled, setScrolled] = useState(false)
 
@@ -24,11 +24,8 @@ export default function Header({ selectedCategory, onSelectCategory }: HeaderPro
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // ✅ Lấy danh mục từ mockData
-  useEffect(() => {
-    setCategories(mockData.categories)
-  }, [])
-
+  if (loading) return null
+ 
   return (
     <header
       className={`w-full border-b bg-white sticky top-0 z-50 transition-all duration-300 ${
@@ -40,9 +37,9 @@ export default function Header({ selectedCategory, onSelectCategory }: HeaderPro
 
       {/* 🔻 Header dưới (danh mục + search) */}
       <HeaderBottom
-        categories={categories.map((cat) => ({
-          id: cat.category_id,
-          name: cat.category_name,
+        categories={categories.map((c) => ({
+          category_id: c.category_id,
+          category_name: c.category_name,
         }))}
         showSearch={showSearch}
         onToggleSearch={() => setShowSearch(!showSearch)}

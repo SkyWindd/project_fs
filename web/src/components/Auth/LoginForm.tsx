@@ -11,8 +11,8 @@ import { Field, FieldLabel, FieldError, FieldGroup } from "../ui/field"
 import { toast } from "sonner"
 import { Lock, Mail, Eye, EyeOff } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { mockUsers } from "../../../mock/mockData"
 import { useAuth } from "../../context/AuthContext" // ✅ Dùng context
+import { loginUser } from "../../lib/api"
 
 const loginSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -34,28 +34,22 @@ export default function LoginForm() {
   const { login } = useAuth() // ✅ Lấy hàm login từ context
   const [showPassword, setShowPassword] = useState(false)
 
-  const onSubmit = (data: LoginFormValues) => {
-    const user = mockUsers.find(
-      (u) => u.email === data.email && u.password === data.password
-    )
+ const onSubmit = async (data: LoginFormValues) => {
+  try {
+    const res = await loginUser(data.email, data.password);
 
-    if (user) {
-      if (!user.is_active) {
-        toast.warning("Tài khoản của bạn đã bị khóa 🚫")
-        return
-      }
+    // res.user là user thật từ MongoDB
+    login(res.user);
 
-      // ✅ Gọi context để lưu user (tự động cập nhật UI)
-      login(user)
-      toast.success(`Xin chào ${user.full_name}! 🎉`)
+    toast.success(`Xin chào ${res.user.full_name}! 🎉`);
 
-      setTimeout(() => {
-        navigate(user.role === "admin" ? "/admin" : "/")
-      }, 1200)
-    } else {
-      toast.error("Sai email hoặc mật khẩu ❌")
-    }
+    setTimeout(() => {
+      navigate(res.user.role === "admin" ? "/admin" : "/");
+    }, 1200);
+  } catch (err: any) {
+    toast.error(err.message || "Đăng nhập thất bại ❌");
   }
+};
 
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border border-gray-100 rounded-3xl bg-white/90 backdrop-blur-sm transition-all hover:shadow-xl">

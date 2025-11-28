@@ -1,6 +1,26 @@
-version: "3.8"
 
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fooddrone_backend
+    working_dir: /app
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=${MONGO_URI}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: node server.js
+    networks:
+      - projectnet
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
   web:
     build:
       context: ./web
@@ -15,4 +35,13 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - HOST=0.0.0.0
+      - VITE_API_URL=http://localhost:5000
     command: npm run dev
+    depends_on:
+      - backend
+    networks:
+      - projectnet
+
+networks:
+  projectnet:
+    driver: bridge
