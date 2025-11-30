@@ -78,7 +78,7 @@ export default function Home() {
                 {selectedCategory}
               </h2>
 
-              <ProductGrid products={filteredProducts} />
+              <ProductGrid selectedCategory={selectedCategory} />
             </motion.div>
           ) : (
             // 🔹 Khi chọn tất cả → hiển thị theo từng category
@@ -115,7 +115,7 @@ export default function Home() {
                       </h2>
                     </div>
 
-                    <ProductGrid products={items} />
+                    <ProductGrid selectedCategory={cat.category_name} />
                   </motion.div>
                 )
               })}

@@ -7,49 +7,61 @@ import {
 } from "../../components/ui/card"
 import { Label } from "../../components/ui/label"
 import { Textarea } from "../../components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select"
-import { MapPin, Edit3 } from "lucide-react"
+import { MapPin, Edit3, Store } from "lucide-react"
 import { Button } from "../../components/ui/button"
+
 import { useLocationContext } from "../../context/LocationContext"
+import { useStore } from "../../context/StoreContext"
 import { toast } from "sonner"
 
 interface DeliverySectionProps {
-  onChange?: (data: { address: string; note: string; time: string }) => void
+  onChange?: (data: {
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+    note: string;
+    time: string;
+  }) => void;
 }
 
 export default function DeliverySection({ onChange }: DeliverySectionProps) {
-  const { fullAddress, isAddressLoaded } = useLocationContext()
+  const {
+    address,
+    latitude,
+    longitude,
+    isAddressLoaded
+  } = useLocationContext()
+
+  const { selectedStore } = useStore()
+
   const [note, setNote] = useState("")
   const [time, setTime] = useState("now")
 
+  // 🔥 Cập nhật dữ liệu lên Checkout
   useEffect(() => {
-    onChange?.({ address: fullAddress, note, time })
-  }, [fullAddress, note, time, onChange])
-
-  // 🧭 Khi không có địa chỉ → hiển thị toast và redirect
-useEffect(() => {
-  if (isAddressLoaded && !fullAddress) {
-    // 🧭 Hiển thị toast cảnh báo
-    toast.warning("Vui lòng chọn lại địa chỉ giao hàng trước khi thanh toán ⚠️", {
-      duration: 2000, // tồn tại 2s
+    onChange?.({
+      address: address || "",
+      latitude: latitude ?? null,
+      longitude: longitude ?? null,
+      note,
+      time,
     })
+  }, [address, latitude, longitude, note, time])
 
-    // ⏳ Sau 2.2s mới chuyển hướng
-    const timeout = setTimeout(() => {
-      window.location.href = "/"
-    }, 2200)
+  // ❗ Cảnh báo nếu mất địa chỉ
+  useEffect(() => {
+    if (isAddressLoaded && !address) {
+      toast.warning("Vui lòng chọn lại địa chỉ giao hàng ⚠️", {
+        duration: 2000,
+      })
 
-    return () => clearTimeout(timeout)
-  }
-}, [isAddressLoaded, fullAddress])
+      const timeout = setTimeout(() => {
+        window.location.href = "/"
+      }, 2200)
 
-
+      return () => clearTimeout(timeout)
+    }
+  }, [isAddressLoaded, address])
 
   return (
     <Card className="shadow-sm border border-gray-100 rounded-xl">
@@ -59,27 +71,52 @@ useEffect(() => {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-5">
-        {/* 🏠 Địa chỉ giao hàng */}
+      <CardContent className="space-y-6">
+        {/* 📌 STORE ĐANG GIAO */}
+        <div className="space-y-2">
+          <Label className="text-sm text-gray-700">Cửa hàng đang giao</Label>
+
+          {selectedStore ? (
+            <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md border border-gray-100">
+              <div className="flex items-start gap-2">
+                <Store className="w-4 h-4 text-blue-600 mt-[2px]" />
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedStore.store_name}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    {selectedStore.address}, {selectedStore.city}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-500 italic">
+              Chưa chọn cửa hàng — vui lòng chọn trước khi đặt món.
+            </p>
+          )}
+        </div>
+
+        {/* 📌 ĐỊA CHỈ GIAO HÀNG */}
         <div className="space-y-2">
           <Label className="text-sm text-gray-700">Địa chỉ giao hàng</Label>
 
-          {fullAddress ? (
+          {address ? (
             <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md border border-gray-100">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-red-500 mt-[2px]" />
                 <p className="text-sm font-medium text-gray-800 leading-snug max-w-[90%]">
-                  {fullAddress}
+                  {address}
                 </p>
               </div>
 
-              {/* Nút chỉnh sửa địa chỉ */}
               <Button
                 size="icon"
                 variant="ghost"
                 className="h-7 w-7 text-gray-500 hover:text-red-600"
-                onClick={() => window.dispatchEvent(new Event("open-location-modal"))}
-                title="Chỉnh sửa địa chỉ"
+                onClick={() =>
+                  window.dispatchEvent(new Event("open-location-modal"))
+                }
               >
                 <Edit3 size={16} />
               </Button>
@@ -91,7 +128,7 @@ useEffect(() => {
           )}
         </div>
 
-        {/* ✏️ Ghi chú cho tài xế */}
+        {/* 📌 GHI CHÚ */}
         <div className="space-y-2">
           <Label htmlFor="note">Ghi chú cho tài xế</Label>
           <Textarea

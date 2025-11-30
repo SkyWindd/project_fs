@@ -1,97 +1,124 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react"
-import type { ReactNode } from "react"
-import { toast } from "sonner"
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
+import { toast } from "sonner";
 
-interface LocationContextType {
-  fullAddress: string
-  shortAddress: string
-  setAddress: (addr: string) => void
-  clearAddress: () => void
-  triggerOpenDialog: boolean
-  setTriggerOpenDialog: (val: boolean) => void
-  isAddressLoaded: boolean // ✅ thêm cờ này
+export interface LocationContextType {
+  address: string;          // full address
+  shortAddress: string;     // rút gọn
+  latitude: number | null;
+  longitude: number | null;
+
+  setLocation: (data: {
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => void;
+
+  clearLocation: () => void;
+
+  triggerOpenDialog: boolean;
+  setTriggerOpenDialog: (val: boolean) => void;
+
+  isAddressLoaded: boolean;
 }
 
-const LocationContext = createContext<LocationContextType | undefined>(undefined)
+const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
 export function LocationProvider({ children }: { children: ReactNode }) {
-  const [fullAddress, setFullAddress] = useState<string>("")
-  const [shortAddress, setShortAddress] = useState<string>("")
-  const [triggerOpenDialog, setTriggerOpenDialog] = useState(false)
-  const [isAddressLoaded, setIsAddressLoaded] = useState(false) // ✅ cờ kiểm tra load
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [address, setAddress] = useState<string>("");
+  const [shortAddress, setShortAddress] = useState<string>("");
+
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
+  const [triggerOpenDialog, setTriggerOpenDialog] = useState(false);
+  const [isAddressLoaded, setIsAddressLoaded] = useState(false);
+
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const shorten = (addr: string) =>
-    addr.length > 35 ? addr.slice(0, 35) + "..." : addr
+    addr.length > 35 ? addr.slice(0, 35) + "..." : addr;
 
-  const setAddress = (addr: string) => {
-    const now = Date.now()
-    localStorage.setItem("userFullAddress", addr)
-    localStorage.setItem("userAddressTimestamp", now.toString())
-    setFullAddress(addr)
-    setShortAddress(shorten(addr))
-    resetExpirationTimer()
-  }
+  // ⭐ LƯU ĐỊA CHỈ VÀO LOCAL STORAGE
+  const setLocation: LocationContextType["setLocation"] = ({
+    address,
+    latitude,
+    longitude,
+  }) => {
+    const now = Date.now();
 
-  const clearAddress = () => {
-    setFullAddress("")
-    setShortAddress("")
-    localStorage.removeItem("userFullAddress")
-    localStorage.removeItem("userAddressTimestamp")
-    toast.warning("Địa chỉ của bạn đã hết hạn, vui lòng chọn lại ⚠️")
-  }
+    localStorage.setItem("addr", address);
+    localStorage.setItem("addr_lat", latitude.toString());
+    localStorage.setItem("addr_lon", longitude.toString());
+    localStorage.setItem("addr_time", now.toString());
 
+    setAddress(address);
+    setShortAddress(shorten(address));
+    setLatitude(latitude);
+    setLongitude(longitude);
+
+    resetExpirationTimer();
+  };
+
+  // ⭐ XOÁ
+  const clearLocation = () => {
+    localStorage.removeItem("addr");
+    localStorage.removeItem("addr_lat");
+    localStorage.removeItem("addr_lon");
+    localStorage.removeItem("addr_time");
+
+    setAddress("");
+    setShortAddress("");
+    setLatitude(null);
+    setLongitude(null);
+
+    toast.warning("Địa chỉ của bạn đã hết hạn, vui lòng chọn lại.");
+  };
+
+  // ⭐ TIMER 15 phút
   const resetExpirationTimer = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => {
-      clearAddress()
-    }, 15 * 60 * 1000) // 15 phút
-  }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(clearLocation, 15 * 60 * 1000);
+  };
 
-  // ✅ Khôi phục địa chỉ khi load trang
+  // ⭐ LOAD LẠI KHI REFRESH
   useEffect(() => {
-    const savedAddr = localStorage.getItem("userFullAddress")
-    if (savedAddr) {
-      setFullAddress(savedAddr)
-      setShortAddress(shorten(savedAddr))
-      resetExpirationTimer()
-    }
-    setIsAddressLoaded(true) // ✅ báo hiệu đã load xong
-  }, [])
+    const savedAddr = localStorage.getItem("addr");
+    const lat = localStorage.getItem("addr_lat");
+    const lon = localStorage.getItem("addr_lon");
 
-  // ✅ Chỉ xoá khi thật sự thoát (không phải reload)
-  useEffect(() => {
-    const handleUnload = (e: BeforeUnloadEvent) => {
-      const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming
-      if (nav?.type !== "reload") {
-        localStorage.removeItem("userFullAddress")
-        localStorage.removeItem("userAddressTimestamp")
-      }
+    if (savedAddr && lat && lon) {
+      setAddress(savedAddr);
+      setShortAddress(shorten(savedAddr));
+      setLatitude(Number(lat));
+      setLongitude(Number(lon));
+      resetExpirationTimer();
     }
-    window.addEventListener("beforeunload", handleUnload)
-    return () => window.removeEventListener("beforeunload", handleUnload)
-  }, [])
+
+    setIsAddressLoaded(true);
+  }, []);
 
   return (
     <LocationContext.Provider
       value={{
-        fullAddress,
+        address,
         shortAddress,
-        setAddress,
-        clearAddress,
+        latitude,
+        longitude,
+        setLocation,
+        clearLocation,
         triggerOpenDialog,
         setTriggerOpenDialog,
-        isAddressLoaded, // ✅ truyền xuống
+        isAddressLoaded,
       }}
     >
       {children}
     </LocationContext.Provider>
-  )
+  );
 }
 
 export function useLocationContext() {
-  const context = useContext(LocationContext)
-  if (!context)
-    throw new Error("useLocationContext must be used within a LocationProvider")
-  return context
+  const ctx = useContext(LocationContext);
+  if (!ctx) throw new Error("useLocationContext must be used inside LocationProvider");
+  return ctx;
 }

@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "../ui/dialog"
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
@@ -14,161 +13,187 @@ import { Button } from "../ui/button"
 import MapPicker from "./MapPicker"
 import { useResponsive } from "../../hooks/useResponsive"
 import { useLocationContext } from "../../context/LocationContext"
+import { useAuth } from "../../context/AuthContext"
+import { fetchUserAddresses } from "../../lib/api"
 
 export default function LocationSelector() {
   const [openDialog, setOpenDialog] = useState(false)
   const [mode, setMode] = useState<"delivery" | "pickup">("delivery")
+
   const [tempAddress, setTempAddress] = useState("")
+  const [tempLat, setTempLat] = useState<number | null>(null)
+  const [tempLon, setTempLon] = useState<number | null>(null)
+
   const [loadingLocation, setLoadingLocation] = useState(false)
   const [showMap, setShowMap] = useState(false)
+
+  const { shortAddress, setLocation } = useLocationContext()
+  const { currentUser } = useAuth()
   const { isMobile } = useResponsive()
-  
-  // ✅ Lấy và set từ context (đã tách full + short)
-  const { fullAddress, shortAddress, setAddress } = useLocationContext()
 
-  // 🧭 Lấy vị trí GPS hiện tại
-  const handleGetLocation = () => {
-  if (!navigator.geolocation) {
-    alert("Trình duyệt không hỗ trợ định vị GPS.")
-    return
-  }
+  const [userAddresses, setUserAddresses] = useState<any[]>([])
+  const [loadingAddress, setLoadingAddress] = useState(true)
 
-  setLoadingLocation(true)
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const { latitude, longitude } = pos.coords
-      const callbackName = "nominatimCallback_" + Date.now()
-
-      ;(window as any)[callbackName] = (data: any) => {
-        setTempAddress(data.display_name || `(${latitude}, ${longitude})`)
-        setLoadingLocation(false)
-        delete (window as any)[callbackName]
-        document.body.removeChild(script)
-      }
-
-      const script = document.createElement("script")
-      script.src = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&json_callback=${callbackName}`
-      script.onerror = () => {
-        alert("Không thể lấy địa chỉ từ vị trí hiện tại.")
-        setLoadingLocation(false)
-      }
-      document.body.appendChild(script)
-    },
-    () => {
-      alert("Không thể truy cập vị trí của bạn.")
-      setLoadingLocation(false)
-    }
-  )
-}
-
-
-
-  // ✅ Xác nhận "Giao hàng tới"
-  const handleDeliveryConfirm = () => {
-    if (!tempAddress.trim()) {
-      alert("Vui lòng nhập hoặc chọn địa chỉ trước.")
+  /** ⭐ Load address saved in database */
+  useEffect(() => {
+    if (!currentUser) {
+      setUserAddresses([])
       return
     }
-    setAddress(tempAddress) // <== chỉ cần gọi 1 lần, context tự xử lý short/full
-    setOpenDialog(false)
+
+    fetchUserAddresses(currentUser.user_id)
+      .then((res) => setUserAddresses(res))
+      .finally(() => setLoadingAddress(false))
+  }, [currentUser])
+
+  /** ⭐ GPS Reverse Geocode */
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) return alert("Trình duyệt không hỗ trợ GPS.")
+
+    setLoadingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords
+
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+        const res = await fetch(url)
+        const data = await res.json()
+
+        setTempAddress(data.display_name || "")
+        setTempLat(latitude)
+        setTempLon(longitude)
+        setLoadingLocation(false)
+      },
+      () => {
+        alert("Không thể truy cập vị trí GPS.")
+        setLoadingLocation(false)
+      }
+    )
   }
 
-  // ✅ Xác nhận "Mua mang về"
-  const handlePickupConfirm = () => {
-    const store = "273 An Dương Vương, Phường Chợ Quán, TP. Hồ Chí Minh"
-    setAddress(`Mua mang về: ${store}`)
+  /** ⭐ CONFIRM DELIVERY */
+  const handleDeliveryConfirm = () => {
+    if (!tempAddress || tempLat === null || tempLon === null) {
+      alert("Vui lòng chọn vị trí.")
+      return
+    }
+
+    setLocation({
+      address: tempAddress,
+      latitude: tempLat,
+      longitude: tempLon,
+    })
+
     setOpenDialog(false)
   }
-
-  // Nếu đã có địa chỉ lưu thì điền lại vào input
-  useEffect(() => {
-    if (fullAddress) setTempAddress(fullAddress)
-  }, [fullAddress])
-
-  // 🧩 Cho phép mở modal từ component khác (vd: trang Checkout)
-useEffect(() => {
-  const handleOpen = () => setOpenDialog(true)
-  window.addEventListener("open-location-modal", handleOpen)
-  return () => window.removeEventListener("open-location-modal", handleOpen)
-}, [])
-
 
   return (
     <>
-      {/* --- Hiển thị ở Header --- */}
+      {/* ----- Mini Header Location ----- */}
       <div
-        className="flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-2 cursor-pointer"
+        className="flex items-center gap-2 cursor-pointer"
         onClick={() => setOpenDialog(true)}
       >
-        <MapPin className="w-5 h-5 text-red-500 flex-shrink-0 mt-[2px]" />
-        <div className="flex flex-col leading-tight">
-          <span className="text-xs md:text-sm font-medium text-gray-700">
-            {shortAddress
-              ? mode === "delivery"
-                ? "Giao hàng tới:"
-                : "Mua mang về:"
-              : "Bạn đang ở đâu?"}
+        <MapPin className="w-5 h-5 text-red-500" />
+        <div>
+          <span className="text-sm text-gray-700">
+            {shortAddress ? "Giao đến:" : "Bạn đang ở đâu?"}
           </span>
-
           {shortAddress && (
-            <span className="text-xs md:text-sm text-gray-600 font-semibold break-words max-w-[160px] md:max-w-[280px]">
+            <p className="text-sm font-semibold text-gray-700">
               {shortAddress}
-            </span>
+            </p>
           )}
         </div>
       </div>
 
-      {/* --- Dialog chọn vị trí --- */}
+      {/* ----- Dialog ----- */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-md rounded-xl">
           <DialogHeader>
             <DialogTitle className="text-center text-xl font-bold">
               TÌM CỬA HÀNG GẦN BẠN NHẤT
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-500">
-              Nhập địa chỉ của bạn để xem ưu đãi và khuyến mãi tại khu vực.
-            </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 mt-2">
-            {/* Chọn chế độ giao hàng / mang về */}
+          <div className="space-y-4 mt-3">
+
+            {/* ⭐ Delivery Type */}
             <RadioGroup
               value={mode}
-              onValueChange={(v) => {
-                const newMode = v as "delivery" | "pickup"
-                setMode(newMode)
-                if (newMode === "delivery") setShowMap(false)
-              }}
+              onValueChange={(v) => setMode(v as any)}
               className="flex justify-center gap-6"
             >
               <label className="flex items-center gap-2 cursor-pointer">
-                <RadioGroupItem value="delivery" id="delivery" />
+                <RadioGroupItem value="delivery" />
                 <span>Giao hàng tới</span>
               </label>
+
               <label className="flex items-center gap-2 cursor-pointer">
-                <RadioGroupItem value="pickup" id="pickup" />
+                <RadioGroupItem value="pickup" />
                 <span>Mua mang về</span>
               </label>
             </RadioGroup>
 
-            {mode === "delivery" ? (
+            {mode === "delivery" && (
               <>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                {/* ⭐ Saved Addresses */}
+                <div className="bg-gray-50 p-3 rounded-lg border">
+                  <p className="text-sm font-medium mb-2">Địa chỉ đã lưu</p>
+
+                  {!currentUser ? (
+                    <p className="text-red-500 text-sm">
+                      🔒 Đăng nhập để dùng địa chỉ đã lưu
+                    </p>
+                  ) : loadingAddress ? (
+                    <p className="text-sm text-gray-500">Đang tải...</p>
+                  ) : userAddresses.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      Bạn chưa có địa chỉ đã lưu.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {userAddresses.map((addr) => (
+                        <div
+                          key={addr.address_id}
+                          onClick={() => {
+                            setTempAddress(`${addr.street}, ${addr.city}`)
+                            setTempLat(addr.latitude)
+                            setTempLon(addr.longitude)
+                          }}
+                          className="p-2 border rounded cursor-pointer hover:bg-red-100"
+                        >
+                          <p className="font-semibold">{addr.address_label}</p>
+                          <p className="text-sm">{addr.street}</p>
+                          <p className="text-xs text-gray-500">{addr.city}</p>
+
+                          {addr.is_default && (
+                            <p className="text-xs text-red-600 font-medium mt-1">
+                              ★ Địa chỉ mặc định
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ⭐ Manual input */}
+                <label className="block text-sm font-medium text-gray-700 mt-2">
                   Vị trí của tôi
                 </label>
+
                 <div className="relative">
                   <Input
-                    placeholder="Nhập địa chỉ cụ thể..."
+                    placeholder="Nhập địa chỉ..."
                     value={tempAddress}
                     onChange={(e) => setTempAddress(e.target.value)}
-                    className="pr-10"
                   />
+
                   <button
                     onClick={handleGetLocation}
                     type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition"
-                    disabled={loadingLocation}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
                   >
                     {loadingLocation ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -178,57 +203,54 @@ useEffect(() => {
                   </button>
                 </div>
 
-                <div className="mt-3 text-center">
-                  <Button
-                    variant="link"
-                    className="text-red-500 font-medium"
-                    onClick={() => setShowMap(true)}
-                  >
+                {/* ⭐ MapPicker */}
+                {showMap && (
+                  <MapPicker
+                    onSelectLocation={(address, lat, lon) => {
+                      setTempAddress(address)
+                      setTempLat(lat)
+                      setTempLon(lon)
+                    }}
+                    onClose={() => setShowMap(false)}
+                  />
+                )}
+
+                <div className="text-center mt-2">
+                  <Button variant="link" onClick={() => setShowMap(true)}>
                     📍 Chọn vị trí trên bản đồ
                   </Button>
-
-                  {showMap && (
-                    <MapPicker
-                      onSelectLocation={(addr) => setTempAddress(addr)}
-                      onClose={() => setShowMap(false)}
-                    />
-                  )}
                 </div>
               </>
-            ) : (
-              <div className="mt-3 text-left space-y-2">
-                <p className="text-sm font-medium text-gray-700">
-                  Bạn sẽ đến lấy tại:
+            )}
+
+            {mode === "pickup" && (
+              <div className="p-3 border rounded-lg bg-gray-50">
+                <p className="text-sm font-medium">Bạn sẽ đến lấy tại:</p>
+                <p className="font-semibold">
+                  273 An Dương Vương, Q.5, TP.HCM
                 </p>
-                <div className="p-3 border rounded-lg bg-gray-50 text-gray-800 font-semibold">
-                  273 An Dương Vương, Phường Chợ Quán, TP. Hồ Chí Minh
-                </div>
               </div>
             )}
           </div>
 
-          {/* Footer */}
-          <DialogFooter className="mt-6">
-            {mode === "delivery" ? (
-              <Button
-                onClick={handleDeliveryConfirm}
-                disabled={!tempAddress.trim()}
-                className={`w-full text-white ${
-                  tempAddress.trim()
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Bắt đầu đặt hàng
-              </Button>
-            ) : (
-              <Button
-                onClick={handlePickupConfirm}
-                className="w-full bg-red-500 hover:bg-red-600 text-white"
-              >
-                Áp dụng
-              </Button>
-            )}
+          <DialogFooter className="mt-5">
+            <Button
+              onClick={
+                mode === "delivery"
+                  ? handleDeliveryConfirm
+                  : () => {
+                      setLocation({
+                        address: "Mua mang về: 273 An Dương Vương, Q.5",
+                        latitude: 0,
+                        longitude: 0,
+                      })
+                      setOpenDialog(false)
+                    }
+              }
+              className="w-full bg-red-600 hover:bg-red-700 text-white"
+            >
+              Áp dụng
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

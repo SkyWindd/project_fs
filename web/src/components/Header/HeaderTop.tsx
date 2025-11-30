@@ -4,10 +4,13 @@ import CartIcon from "./CartIcon"
 import UserMenu from "./UserMenu"
 import { useResponsive } from "../../hooks/useResponsive"
 import { useCart } from "../../context/CartContext"
-
+import { useStore } from "../../context/StoreContext"
+import { Store } from "lucide-react"
+import StoreSelector from "./StoreSelector"
 export default function HeaderTop({ scrolled }: { scrolled: boolean }) {
   const { isMobile } = useResponsive()
   const { cartItems } = useCart()
+  const { selectedStore } = useStore()
 
   return (
     <div
@@ -15,17 +18,29 @@ export default function HeaderTop({ scrolled }: { scrolled: boolean }) {
         scrolled ? "py-2 md:py-2" : "py-3 md:py-4"
       }`}
     >
-      {/* Địa chỉ / Location */}
+      {/* Địa chỉ */}
       <div
         className={`flex flex-col items-start justify-center ${
           isMobile ? "min-w-[40px]" : "min-w-[140px] max-w-[230px]"
         }`}
       >
-        {/* ✅ Chỉ render 1 component LocationSelector — không cần hiển thị lại address */}
         <LocationSelector />
       </div>
 
-      {/* Logo giữa */}
+      {/* Cửa hàng */}
+      <button
+        onClick={() => window.dispatchEvent(new Event("open-store-modal"))}
+        className="flex items-center gap-2 text-sm text-gray-700 hover:text-red-600 transition"
+      >
+        <Store size={18} className="text-red-500" />
+        {selectedStore ? (
+          <span>{selectedStore.store_name}</span>
+        ) : (
+          <span>Chọn cửa hàng</span>
+        )}
+      </button>
+
+      {/* Logo */}
       <div className="absolute left-1/2 -translate-x-1/2">
         <Link to="/" className="flex items-center gap-2">
           <h1
@@ -38,11 +53,15 @@ export default function HeaderTop({ scrolled }: { scrolled: boolean }) {
         </Link>
       </div>
 
-      {/* Cột phải: Giỏ hàng + User */}
+      {/* Cart + User */}
       <div className="flex items-center gap-4 md:gap-6 ml-auto">
         <CartIcon />
         <UserMenu />
       </div>
+
+      {/* 👇 Modal chọn cửa hàng */}
+      <StoreSelector />
     </div>
   )
 }
+

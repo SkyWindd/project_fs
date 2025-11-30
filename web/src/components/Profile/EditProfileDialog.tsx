@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { useAuth } from "../../context/AuthContext"
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import {
   Dialog,
   DialogTrigger,
@@ -9,46 +9,48 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../ui/dialog"
-import { Input } from "../ui/input"
-import { Button } from "../ui/button"
-import { Label } from "../ui/label"
-import { toast } from "sonner"
-import { Eye, EyeOff } from "lucide-react"
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
+import { updateUserInfo } from "../../lib/api";
 
 export default function EditProfileDialog() {
-  const { currentUser, updateUser } = useAuth()
-  const [open, setOpen] = useState(false)
+  const { currentUser, updateUser } = useAuth();
+  const [open, setOpen] = useState(false);
 
-  const [fullName, setFullName] = useState(currentUser?.full_name || "")
-  const [phone, setPhone] = useState(currentUser?.phone_number || "")
-  const [password, setPassword] = useState(currentUser?.password || "")
-  const [showPassword, setShowPassword] = useState(false)
+  const [fullName, setFullName] = useState(currentUser?.full_name || "");
+  const [phone, setPhone] = useState(currentUser?.phone_number || "");
+  const [password, setPassword] = useState(currentUser?.password || "");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSave = () => {
-  if (!currentUser) {
-    toast.error("Không tìm thấy thông tin người dùng ❌")
-    return
-  }
+  const handleSave = async () => {
+    if (!currentUser) {
+      toast.error("Không tìm thấy thông tin người dùng ❌");
+      return;
+    }
 
-  if (!fullName.trim()) {
-    toast.error("Tên không được để trống ❌")
-    return
-  }
+    if (!fullName.trim()) {
+      toast.error("Tên không được để trống ❌");
+      return;
+    }
 
-  const updated = {
-    ...currentUser,
-    full_name: fullName,
-    phone_number: phone,
-    password,
-    updated_at: new Date().toISOString(),
-  } as typeof currentUser // ✅ giữ đúng type, không lỗi TypeScript
+        try {
+        const updated = await updateUserInfo(currentUser.user_id, {
+          full_name: fullName,
+          phone_number: phone,
+          password: password,
+        });
 
-  updateUser(updated)
-  toast.success("Cập nhật thông tin thành công 🎉")
-  setOpen(false)
-}
-
+        updateUser(updated); // cập nhật localStorage
+        toast.success("Cập nhật thành công!");
+        setOpen(false);
+      } catch (err: any) {
+        toast.error(err.message);
+      }
+    };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -115,11 +117,14 @@ export default function EditProfileDialog() {
           <Button variant="outline" onClick={() => setOpen(false)}>
             Hủy
           </Button>
-          <Button onClick={handleSave} className="bg-red-600 hover:bg-red-700 text-white">
+          <Button
+            onClick={handleSave}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
             Lưu thay đổi
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

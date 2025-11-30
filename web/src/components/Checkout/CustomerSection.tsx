@@ -6,7 +6,12 @@ import { Input } from "../../components/ui/input"
 import { useAuth } from "../../context/AuthContext"
 
 interface CustomerSectionProps {
-  onChange?: (data: { name: string; phone: string; email: string }) => void
+  onChange?: (data: {
+  user_id: number | null;
+  name: string;
+  phone: string;
+  email: string;
+    }) => void;
 }
 
 export default function CustomerSection({ onChange }: CustomerSectionProps) {
@@ -27,8 +32,13 @@ export default function CustomerSection({ onChange }: CustomerSectionProps) {
 
   // Gửi dữ liệu ra ngoài
   useEffect(() => {
-    onChange?.({ name, phone, email })
-  }, [name, phone, email])
+  onChange?.({
+    user_id: currentUser?.user_id || null,
+    name,
+    phone,
+    email
+  })
+}, [name, phone, email, currentUser])
 
   return (
     <Card className="shadow-sm border border-gray-200 rounded-2xl">

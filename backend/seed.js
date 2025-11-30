@@ -11,7 +11,8 @@ import Order from "./src/models/Order.js";
 import OrderDetail from "./src/models/OrderDetail.js";
 import Payment from "./src/models/Payment.js";
 import Tracking from "./src/models/Tracking.js";
-
+import Store from "./src/models/Store.js";
+import StoreMenuItem from "./src/models/StoreMenuItem.js";
 import mock from "./mock/mockData.js"; // ← FILE mockData bạn gửi
 
 dotenv.config();
@@ -33,6 +34,8 @@ async function seed() {
       OrderDetail.deleteMany(),
       Payment.deleteMany(),
       Tracking.deleteMany(),
+      Store.deleteMany(),
+      StoreMenuItem.deleteMany(),
     ]);
 
     // Import dữ liệu mới
@@ -46,6 +49,8 @@ async function seed() {
     await OrderDetail.insertMany(mock.orderdetails);
     await Payment.insertMany(mock.payments);
     await Tracking.insertMany(mock.tracking);
+    await Store.insertMany(mock.stores);
+    await StoreMenuItem.insertMany(mock.storemenuitems);
 
     console.log("Mock data imported successfully!");
     process.exit();

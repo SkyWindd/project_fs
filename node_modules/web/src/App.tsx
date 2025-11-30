@@ -3,8 +3,10 @@ import { router } from "./router"
 import { LocationProvider } from "./context/LocationContext"
 import { Toaster } from "sonner"
 import { AuthProvider } from "./context/AuthContext"
-import { CategoryProvider } from "./context/CategoryContext"   // ⭐ THÊM DÒNG NÀY
+import { CategoryProvider } from "./context/CategoryContext"   
 import { MenuProvider } from "./context/MenuContext"
+import { StoreProvider } from "./context/StoreContext" 
+import { StoreMenuProvider } from "./context/StoreMenuContext"        
 export default function App() {
   return (
     <>
@@ -21,7 +23,11 @@ export default function App() {
         <LocationProvider>
           <CategoryProvider>     
              <MenuProvider>
-                <RouterProvider router={router} />
+                <StoreProvider>
+                  <StoreMenuProvider>
+                  <RouterProvider router={router} />
+                  </StoreMenuProvider>
+                </StoreProvider>
              </MenuProvider>
           </CategoryProvider>
         </LocationProvider>

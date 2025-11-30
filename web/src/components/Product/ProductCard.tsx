@@ -21,10 +21,10 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [open, setOpen] = useState(false)
-  const { fullAddress } = useLocationContext() // ✅ lấy địa chỉ hiện tại
+  const { address  } = useLocationContext() // ✅ lấy địa chỉ hiện tại
 
  const handleOpenModal = () => {
-  if (!fullAddress) {
+  if (!address ) {
     toast.warning("Vui lòng chọn địa chỉ giao hàng trước khi chọn món 🍕")
     window.dispatchEvent(new Event("open-location-modal")) // ✅ Mở LocationSelector
     return

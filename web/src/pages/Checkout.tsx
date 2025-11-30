@@ -1,32 +1,40 @@
-import React, { useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-import { toast } from "sonner"
-import { Button } from "../components/ui/button"
-import { AlertCircle, CheckCircle2} from "lucide-react"
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-import DeliverySection from "../components/Checkout/DeliverySection"
-import CustomerSection from "../components/Checkout/CustomerSection"
-import PaymentSection from "../components/Checkout/PaymentSection"
-import SummarySection from "../components/Checkout/SummarySection"
-import LocationSelector from "../components/Location/LocationSelector"
-import PaymentTransferModal from "../components/Payment/PaymentTransferModal"
-import MomoModal from "../components/Payment/MomoModal"
+import { Button } from "../components/ui/button";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+
+import DeliverySection from "../components/Checkout/DeliverySection";
+import CustomerSection from "../components/Checkout/CustomerSection";
+import PaymentSection from "../components/Checkout/PaymentSection";
+import SummarySection from "../components/Checkout/SummarySection";
+import LocationSelector from "../components/Location/LocationSelector";
+import PaymentTransferModal from "../components/Payment/PaymentTransferModal";
+import MomoModal from "../components/Payment/MomoModal";
+
+import { createOrder } from "../lib/api";
+import { useStore } from "../context/StoreContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Checkout() {
-  const { state } = useLocation()
-  const navigate = useNavigate()
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const { selectedStore } = useStore();
+  const { currentUser } = useAuth();
 
-  const [deliveryInfo, setDeliveryInfo] = useState<any>(null)
-  const [customerInfo, setCustomerInfo] = useState<any>(null)
-  const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
-  const [openMomo, setOpenMomo] = useState(false)
-  const [openBanking, setOpenBanking] = useState(false)
-  const [openTransfer, setOpenTransfer] = useState(false);
+  const [deliveryInfo, setDeliveryInfo] = useState<any>(null);
+  const [customerInfo, setCustomerInfo] = useState<any>(null);
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+
+  const [openMomo, setOpenMomo] = useState(false);
+  const [openBanking, setOpenBanking] = useState(false);
+
   const [errors, setErrors] = useState({
     delivery: "",
     customer: "",
     payment: "",
-  })
+  });
 
   if (!state?.cartItems || state.cartItems.length === 0) {
     return (
@@ -34,70 +42,102 @@ export default function Checkout() {
         <p className="text-lg mb-2">Không có sản phẩm trong giỏ hàng</p>
         <Button onClick={() => navigate("/")}>Quay lại mua hàng</Button>
       </div>
-    )
+    );
   }
 
-  const { cartItems, subtotal, total } = state
+  const { cartItems, subtotal, total } = state;
 
+  // =========================
+  //  VALIDATION
+  // =========================
   const validateBeforeOrder = () => {
-    const newErrors = { delivery: "", customer: "", payment: "" }
-    let valid = true
+  const newErrors = { delivery: "", customer: "", payment: "" };
+  let ok = true;
 
-    if (!deliveryInfo) {
-      newErrors.delivery = "Vui lòng chọn địa chỉ giao hàng."
-      valid = false
-    }
-    if (!customerInfo) {
-      newErrors.customer = "Vui lòng nhập thông tin khách hàng."
-      valid = false
-    }
-    if (!paymentMethod) {
-      newErrors.payment = "Vui lòng chọn phương thức thanh toán."
-      valid = false
-    }
-
-    setErrors(newErrors)
-    return valid
+  if (!deliveryInfo?.address || !deliveryInfo?.latitude || !deliveryInfo?.longitude) {
+    newErrors.delivery = "Vui lòng chọn địa chỉ giao hàng.";
+    ok = false;
   }
 
-  const handleOrder = () => {
-    if (!validateBeforeOrder()) {
-      toast.error("Vui lòng kiểm tra lại thông tin trước khi thanh toán ⚠️")
-      return
-    }
+  if (!currentUser) {
+    newErrors.customer = "Bạn chưa đăng nhập.";
+    ok = false;
+  }
 
-    // 🔥 Nếu chọn MoMo → mở modal mô phỏng
-    if (paymentMethod === "momo") {
-      setOpenMomo(true)
-      return
-    }
-      if (paymentMethod === "banking") {
-    setOpenTransfer(true); 
-    setOpenBanking(true)
-    return
+  if (!paymentMethod) {
+    newErrors.payment = "Vui lòng chọn phương thức thanh toán.";
+    ok = false;
   }
+
+  setErrors(newErrors);
+  return ok;
+};
+
+  // =========================
+  //  HANDLE ORDER
+  // =========================
+  const handleOrder = async () => {
+  if (!validateBeforeOrder()) {
+    toast.error("Vui lòng kiểm tra lại thông tin trước khi thanh toán ⚠️");
+    return;
   }
+
+  if (!selectedStore) {
+    toast.error("Bạn chưa chọn cửa hàng giao hàng ❗");
+    return;
+  }
+
+  const payload = {
+    user_id: currentUser!.user_id,
+    store_id: selectedStore.store_id,
+
+    address: deliveryInfo.address,
+    latitude: deliveryInfo.latitude,
+    longitude: deliveryInfo.longitude,
+
+    note: deliveryInfo.note || "",
+    payment_method: paymentMethod,
+
+    cart: cartItems.map((i: any) => ({
+      item_id: i.item_id,
+      price: i.price,
+      quantity: i.quantity
+    })),
+  };
+
+  console.log("📦 Payload gửi backend:", payload);
+
+  try {
+    const res = await createOrder(payload);
+    toast.success(`Đặt hàng thành công! Mã đơn #${res.order_id}`);
+    navigate("/profile?tab=orders");
+  } catch (err: any) {
+    toast.error(err.message || "Lỗi tạo đơn hàng ❌");
+  }
+};
 
   return (
     <>
-      {/* ⛔ Ẩn nhưng giữ trong DOM để LocationSelector hoạt động */}
+      {/* Giữ DOM để LocationSelector hoạt động */}
       <div className="hidden">
         <LocationSelector />
       </div>
 
-      {/* Back button */}
+      {/* BACK BUTTON */}
       <div className="max-w-6xl mx-auto mt-6 mb-2 px-6">
         <Button
           variant="ghost"
-          className="flex items-center gap-2 text-gray-700 hover:text-red-600 hover:bg-gray-100"
+          className="flex items-center gap-2 text-gray-700 hover:text-red-600"
           onClick={() => navigate(-1)}
         >
           ← Quay lại
         </Button>
       </div>
 
+      {/* MAIN GRID */}
       <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
         <div className="space-y-6">
+          {/* Delivery */}
           <div>
             <DeliverySection onChange={setDeliveryInfo} />
             {errors.delivery && (
@@ -107,6 +147,7 @@ export default function Checkout() {
             )}
           </div>
 
+          {/* Customer */}
           <div>
             <CustomerSection onChange={setCustomerInfo} />
             {errors.customer && (
@@ -116,6 +157,7 @@ export default function Checkout() {
             )}
           </div>
 
+          {/* Payment */}
           <div>
             <PaymentSection onChange={setPaymentMethod} />
             {errors.payment && (
@@ -126,68 +168,51 @@ export default function Checkout() {
           </div>
         </div>
 
+        {/* Summary */}
         <SummarySection
           cartItems={cartItems}
           subtotal={subtotal}
           total={total}
           onOrder={handleOrder}
         />
-       <PaymentTransferModal
-        open={openBanking}
-        onClose={() => setOpenBanking(false)}
-        totalAmount={total}       // 🟢 gửi đúng total
-        customer={customerInfo}   // 🟢 thông tin khách hàng
-        onConfirm={() => {
-          toast.custom(
-            (t) => (
-              <div
-                className="bg-white border border-gray-200 shadow-lg rounded-xl px-4 py-3 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-3"
-              >
-                {/* Icon Success */}
+
+        {/* Banking modal */}
+        <PaymentTransferModal
+          open={openBanking}
+          onClose={() => setOpenBanking(false)}
+          totalAmount={total}
+          customer={customerInfo}
+          onConfirm={() => {
+            toast.custom((t) => (
+              <div className="bg-white border shadow-lg rounded-xl px-4 py-3 flex items-start gap-3">
                 <div className="p-2 rounded-full bg-green-100 text-green-600">
                   <CheckCircle2 size={20} />
                 </div>
-
-                {/* Nội dung */}
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-900">
-                    Thanh toán thành công! 🎉
-                  </p>
-
-                  <p className="text-sm text-gray-600 mt-0.5 leading-snug">
-                    Bạn có thể theo dõi trạng thái đơn hàng tại{" "}
-                    <span className="font-semibold text-red-600">
-                      Theo dõi đơn hàng
-                    </span>{" "}
-                    trong phần tài khoản.
-                  </p>
+                  <p className="font-semibold text-gray-900">Thanh toán thành công! 🎉</p>
                 </div>
-
-                {/* Nút đóng */}
                 <button
                   onClick={() => toast.dismiss(t)}
-                  className="text-gray-400 hover:text-gray-600 transition"
+                  className="text-gray-400 hover:text-gray-600"
                 >
                   ✕
                 </button>
               </div>
-            ),
-            { duration: 4500 }
-            );          
-            navigate("/")
-        }}
-      />
+            ));
+            navigate("/");
+          }}
+        />
       </div>
 
-      {/* 🟣 MODAL THANH TOÁN MOMO */}
+      {/* Momo modal */}
       <MomoModal
         open={openMomo}
         onClose={() => {
-          setOpenMomo(false)
-          navigate("/")
+          setOpenMomo(false);
+          navigate("/");
         }}
         totalAmount={total}
       />
     </>
-  )
+  );
 }

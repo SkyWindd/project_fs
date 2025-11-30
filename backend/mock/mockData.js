@@ -280,7 +280,10 @@ export const mockOrders = [
   {
     order_id: 1,
     user_id: 1,
-    address_id: 1,
+    store_id: 2,
+    address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
+    latitude: 10.7757,
+    longitude: 106.7004,
     drone_id: 1,
     total_amount: 188000,
     delivery_fee: 10000,
@@ -293,7 +296,10 @@ export const mockOrders = [
   {
     order_id: 2,
     user_id: 1,
-    address_id: 2,
+    store_id: 3,
+    address: "45 Võ Văn Tần, Quận 3, TP.HCM",
+    latitude: 10.7798,
+    longitude: 106.6956,
     drone_id: 2,
     total_amount: 89000,
     delivery_fee: 10000,
@@ -304,6 +310,7 @@ export const mockOrders = [
     updated_at: "2025-11-09T14:30:00Z",
   },
 ];
+
 
 export const mockOrderDetails = [
   { order_detail_id: 1, order_id: 1, item_id: 1, quantity: 1, price: 159000, subtotal: 159000 },
@@ -357,6 +364,158 @@ export const mockTracking = [
   },
 ];
 
+export const mockStores = [
+    {
+      store_id: 1,
+      store_name: "PizzaHouse - Quận 1",
+      address: "123 Lê Lợi, Quận 1, TP.HCM",
+      city: "Hồ Chí Minh",
+      latitude: 10.77584,
+      longitude: 106.701755,
+      phone_number: "0901 234 567",
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      store_id: 2,
+      store_name: "PizzaHouse - Quận 3",
+      address: "45 Võ Văn Tần, Quận 3, TP.HCM",
+      city: "Hồ Chí Minh",
+      latitude: 10.779874,
+      longitude: 106.692324,
+      phone_number: "0902 345 678",
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      store_id: 3,
+      store_name: "PizzaHouse - Bình Thạnh",
+      address: "200 Điện Biên Phủ, Bình Thạnh, TP.HCM",
+      city: "Hồ Chí Minh",
+      latitude: 10.8023,
+      longitude: 106.7134,
+      phone_number: "0903 456 789",
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ];
+
+  // ⭐ NEW: Danh sách món ăn mỗi cửa hàng có sẵn
+export const mockStoremenuitems = [
+  // ======================
+  // 📍 STORE 1 — QUẬN 1
+  // ======================
+  { store_id: 1, item_id: 1,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 2,  is_available: true,  price_override: 159000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 3,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 4,  is_available: true,  price_override: 99000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 5,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  { store_id: 1, item_id: 6,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 7,  is_available: false, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 8,  is_available: true,  price_override: 49000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 9,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 10, is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  { store_id: 1, item_id: 11, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 12, is_available: true, price_override: 19000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 13, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 14, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 1, item_id: 15, is_available: true, price_override: 15000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  // ======================
+  // 📍 STORE 2 — QUẬN 3
+  // ======================
+  { store_id: 2, item_id: 1,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 2,  is_available: false, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 3,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 4,  is_available: true,  price_override: 99000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 5,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  { store_id: 2, item_id: 6,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 7,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 8,  is_available: false, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 9,  is_available: true,  price_override: 45000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 10, is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  { store_id: 2, item_id: 11, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 12, is_available: true, price_override: 20000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 13, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 14, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 2, item_id: 15, is_available: true, price_override: 15000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  // ======================
+  // 📍 STORE 3 — BÌNH THẠNH
+  // ======================
+  { store_id: 3, item_id: 1,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 2,  is_available: true,  price_override: 155000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 3,  is_available: false, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 4,  is_available: true,  price_override: 99000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 5,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  { store_id: 3, item_id: 6,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 7,  is_available: false, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 8,  is_available: true,  price_override: 45000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 9,  is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 10, is_available: true,  price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+
+  { store_id: 3, item_id: 11, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 12, is_available: true, price_override: 19000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 13, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 14, is_available: true, price_override: null,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { store_id: 3, item_id: 15, is_available: true, price_override: 15000,
+    created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+];
+
+
+
 // ---------- EXPORT ALL ----------
 export default {
   users: mockUsers,
@@ -369,4 +528,6 @@ export default {
   orderdetails: mockOrderDetails,
   payments: mockPayments,
   tracking: mockTracking,
+  stores: mockStores,
+  storemenuitems: mockStoremenuitems,
 };
