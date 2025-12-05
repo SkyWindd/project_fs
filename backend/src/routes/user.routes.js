@@ -1,56 +1,78 @@
 import { Router } from "express";
 import User from "../models/User.js";
 import Address from "../models/Address.js";
+import { authMiddleware } from "../middlewares/auth.js";
 
 const router = Router();
 
 /* ================================
-   📌 LẤY THÔNG TIN USER
+   📌 LẤY THÔNG TIN USER (YÊU CẦU LOGIN)
 ================================ */
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findOne({ user_id: Number(req.params.id) });
+    const user_id = Number(req.params.id);
+
+    // Không cho user xem info của người khác
+    if (req.user.user_id !== user_id && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Không có quyền truy cập" });
+    }
+
+    const user = await User.findOne({ user_id }, { password: 0 }); // ẩn password
     if (!user) return res.status(404).json({ error: "User không tồn tại" });
 
-    res.json(user);
+    res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 /* ================================
-   📌 CẬP NHẬT THÔNG TIN USER
+   📌 CẬP NHẬT THÔNG TIN USER (SAFETY MODE)
 ================================ */
-// Cập nhật thông tin user
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
   try {
+    const user_id = Number(req.params.id);
+
+    if (req.user.user_id !== user_id && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Không có quyền cập nhật" });
+    }
+
+    const allowed = {
+      full_name: req.body.full_name,
+      phone_number: req.body.phone_number,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Tuyệt đối KHÔNG cho sửa password ở API này
+    // Sửa password phải qua API riêng có kiểm tra mật khẩu cũ
+
     const updated = await User.findOneAndUpdate(
-      { user_id: req.params.id },
-      {
-        full_name: req.body.full_name,
-        phone_number: req.body.phone_number,
-        password: req.body.password,
-        updated_at: new Date().toISOString(),
-      },
-      { new: true }
+      { user_id },
+      allowed,
+      { new: true, projection: { password: 0 } }
     );
 
     if (!updated) return res.status(404).json({ error: "User không tồn tại" });
 
-    res.json(updated);
+    res.json({ message: "Cập nhật thành công", user: updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-
 /* ================================
    📌 LẤY DANH SÁCH ĐỊA CHỈ USER
 ================================ */
-router.get("/:id/address", async (req, res) => {
+router.get("/:id/address", authMiddleware, async (req, res) => {
   try {
-    const list = await Address.find({ user_id: Number(req.params.id) });
-    res.json(list);
+    const user_id = Number(req.params.id);
+
+    if (req.user.user_id !== user_id && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Không có quyền truy cập" });
+    }
+
+    const list = await Address.find({ user_id });
+    res.json({ addresses: list });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -59,21 +81,23 @@ router.get("/:id/address", async (req, res) => {
 /* ================================
    📌 THÊM ĐỊA CHỈ MỚI
 ================================ */
-router.post("/:id/address", async (req, res) => {
+router.post("/:id/address", authMiddleware, async (req, res) => {
   try {
-    const userId = Number(req.params.id);
+    const user_id = Number(req.params.id);
 
-    // 1️⃣ Lấy address cuối cùng của user để tạo id mới
-    const last = await Address.find({ user_id: userId })
+    if (req.user.user_id !== user_id && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Không có quyền thêm địa chỉ" });
+    }
+
+    const last = await Address.find({ user_id })
       .sort({ address_id: -1 })
       .limit(1);
 
     const nextId = last.length > 0 ? last[0].address_id + 1 : 1;
 
-    // 2️⃣ Tạo payload đầy đủ
     const payload = {
       address_id: nextId,
-      user_id: userId,
+      user_id,
       address_label: req.body.address_label,
       street: req.body.street,
       city: req.body.city,
@@ -84,31 +108,30 @@ router.post("/:id/address", async (req, res) => {
       updated_at: new Date().toISOString(),
     };
 
-    // 3️⃣ Lưu
     const created = await Address.create(payload);
-    res.json(created);
-
+    res.json({ message: "Đã thêm địa chỉ", address: created });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-
 /* ================================
    📌 SỬA ĐỊA CHỈ
 ================================ */
-router.put("/:id/address/:addressId", async (req, res) => {
+router.put("/:id/address/:addressId", authMiddleware, async (req, res) => {
   try {
     const user_id = Number(req.params.id);
     const address_id = Number(req.params.addressId);
 
-    // Lấy thông tin cũ
+    if (req.user.user_id !== user_id && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Không có quyền sửa địa chỉ" });
+    }
+
     const existing = await Address.findOne({ user_id, address_id });
     if (!existing) {
       return res.status(404).json({ error: "Address không tồn tại" });
     }
 
-    // Chuẩn hóa dữ liệu update
     const updatedData = {
       address_label: req.body.address_label ?? existing.address_label,
       street: req.body.street ?? existing.street,
@@ -117,36 +140,33 @@ router.put("/:id/address/:addressId", async (req, res) => {
       longitude: req.body.longitude ?? existing.longitude,
       is_default: req.body.is_default ?? existing.is_default,
       updated_at: new Date().toISOString(),
-
-      // GIỮ NGUYÊN
-      created_at: existing.created_at,
-      user_id: existing.user_id,
-      address_id: existing.address_id,
     };
 
-    // Thực hiện cập nhật
     const updated = await Address.findOneAndUpdate(
       { user_id, address_id },
       updatedData,
       { new: true }
     );
 
-    res.json(updated);
+    res.json({ message: "Đã cập nhật địa chỉ", address: updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-
 /* ================================
    📌 XOÁ ĐỊA CHỈ
 ================================ */
-router.delete("/:id/address/:addressId", async (req, res) => {
+router.delete("/:id/address/:addressId", authMiddleware, async (req, res) => {
   try {
-    const deleted = await Address.findOneAndDelete({
-      address_id: Number(req.params.addressId),
-      user_id: Number(req.params.id),
-    });
+    const user_id = Number(req.params.id);
+    const address_id = Number(req.params.addressId);
+
+    if (req.user.user_id !== user_id && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Không có quyền xoá địa chỉ" });
+    }
+
+    const deleted = await Address.findOneAndDelete({ user_id, address_id });
 
     if (!deleted)
       return res.status(404).json({ error: "Address không tồn tại" });
