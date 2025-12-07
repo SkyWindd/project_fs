@@ -16,20 +16,27 @@ import {
   SelectContent,
   SelectItem,
 } from "../ui/select";
-import type { MenuItem } from "../../../mock/mockData";
 
-interface ProductDialogProps {
+import type { MenuItem, Category } from "../../../mock/mockData";
+
+// 🔥 THÊM PROP categories + onOpenAddCategory
+export interface ProductDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (value: boolean) => void;
   item: MenuItem | null;
   onSave: (data: MenuItem) => void;
+  categories: Category[];
+  onOpenAddCategory: () => void;
 }
+
 
 export default function ProductDialog({
   open,
   onOpenChange,
   item,
   onSave,
+  categories,
+  onOpenAddCategory,
 }: ProductDialogProps) {
   const [form, setForm] = useState<MenuItem>({
     item_id: 0,
@@ -98,8 +105,20 @@ export default function ProductDialog({
             />
           </div>
 
+          {/* Category Select */}
           <div>
-            <Label className="font-medium mb-1 block">Loại sản phẩm</Label>
+            <div className="flex justify-between items-center mb-1">
+              <Label className="font-medium">Loại sản phẩm</Label>
+
+              {/* 🔥 Nút mở dialog thêm category */}
+              <button
+                className="text-blue-600 text-sm hover:underline"
+                onClick={onOpenAddCategory}
+              >
+                + Thêm loại
+              </button>
+            </div>
+
             <Select
               value={String(form.category_id)}
               onValueChange={(val) =>
@@ -109,10 +128,13 @@ export default function ProductDialog({
               <SelectTrigger>
                 <SelectValue placeholder="Chọn loại sản phẩm" />
               </SelectTrigger>
+
               <SelectContent>
-                <SelectItem value="1">🍕 Pizza</SelectItem>
-                <SelectItem value="2">🍟 Món ăn kèm</SelectItem>
-                <SelectItem value="3">🧃 Đồ uống</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.category_id} value={String(c.category_id)}>
+                    {c.category_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
