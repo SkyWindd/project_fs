@@ -39,7 +39,7 @@ export default function LoginForm() {
     const res = await loginUser(data.email, data.password);
 
     // res.user là user thật từ MongoDB
-    login(res.user);
+    login(res.user, res.token);
 
     toast.success(`Xin chào ${res.user.full_name}! 🎉`);
 

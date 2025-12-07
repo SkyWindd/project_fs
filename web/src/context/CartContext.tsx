@@ -9,7 +9,7 @@ import React, {
 import { toast } from "sonner"
 
 export interface CartItem {
-  id: number
+  item_id: number
   name: string
   size?: string
   crust?: string
@@ -22,8 +22,8 @@ export interface CartItem {
 interface CartContextType {
   cartItems: CartItem[]
   addToCart: (item: CartItem) => void
-  removeFromCart: (id: number) => void
-  updateQuantity: (id: number, quantity: number) => void
+  removeFromCart: (item_id: number) => void
+  updateQuantity: (item_id: number, quantity: number) => void
   clearCart: () => void
 }
 
@@ -76,33 +76,42 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [cartItems])
 
   // ✅ Thêm sản phẩm (nếu trùng thì tăng số lượng)
-  const addToCart = (item: CartItem) => {
-    setCartItems((prev) => {
-      const existing = prev.find(
-        (p) => p.id === item.id && p.size === item.size && p.crust === item.crust
-      )
-      if (existing) {
-        return prev.map((p) =>
-          p === existing ? { ...p, quantity: p.quantity + item.quantity } : p
-        )
-      }
-      return [...prev, item]
-    })
-  }
+  // Thêm vào giỏ
+const addToCart = (item: CartItem) => {
+  setCartItems((prev) => {
+    const existing = prev.find(
+      (p) =>
+        p.item_id === item.item_id && // ← FIX
+        p.size === item.size &&
+        p.crust === item.crust
+    );
 
-  // ✅ Xoá sản phẩm theo id
-  const removeFromCart = (id: number) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id))
-  }
+    if (existing) {
+      return prev.map((p) =>
+        p === existing ? { ...p, quantity: p.quantity + item.quantity } : p
+      );
+    }
 
-  // ✅ Cập nhật số lượng
-  const updateQuantity = (id: number, quantity: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
-      )
+    return [...prev, item];
+  });
+};
+
+// Xóa
+const removeFromCart = (item_id: number) => {
+  setCartItems((prev) => prev.filter((item) => item.item_id !== item_id));
+};
+
+// Cập nhật số lượng
+const updateQuantity = (item_id: number, quantity: number) => {
+  setCartItems((prev) =>
+    prev.map((item) =>
+      item.item_id === item_id
+        ? { ...item, quantity: Math.max(1, quantity) }
+        : item
     )
-  }
+  );
+};
+
 
   // ✅ Xoá toàn bộ giỏ hàng
   const clearCart = (expired = false) => {

@@ -12,10 +12,6 @@ router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const user_id = Number(req.params.id);
 
-    // Không cho user xem info của người khác
-    if (req.user.user_id !== user_id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Không có quyền truy cập" });
-    }
 
     const user = await User.findOne({ user_id }, { password: 0 }); // ẩn password
     if (!user) return res.status(404).json({ error: "User không tồn tại" });
@@ -33,9 +29,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const user_id = Number(req.params.id);
 
-    if (req.user.user_id !== user_id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Không có quyền cập nhật" });
-    }
 
     const allowed = {
       full_name: req.body.full_name,
@@ -67,9 +60,6 @@ router.get("/:id/address", authMiddleware, async (req, res) => {
   try {
     const user_id = Number(req.params.id);
 
-    if (req.user.user_id !== user_id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Không có quyền truy cập" });
-    }
 
     const list = await Address.find({ user_id });
     res.json({ addresses: list });
@@ -85,9 +75,6 @@ router.post("/:id/address", authMiddleware, async (req, res) => {
   try {
     const user_id = Number(req.params.id);
 
-    if (req.user.user_id !== user_id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Không có quyền thêm địa chỉ" });
-    }
 
     const last = await Address.find({ user_id })
       .sort({ address_id: -1 })
@@ -123,9 +110,6 @@ router.put("/:id/address/:addressId", authMiddleware, async (req, res) => {
     const user_id = Number(req.params.id);
     const address_id = Number(req.params.addressId);
 
-    if (req.user.user_id !== user_id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Không có quyền sửa địa chỉ" });
-    }
 
     const existing = await Address.findOne({ user_id, address_id });
     if (!existing) {
@@ -161,10 +145,6 @@ router.delete("/:id/address/:addressId", authMiddleware, async (req, res) => {
   try {
     const user_id = Number(req.params.id);
     const address_id = Number(req.params.addressId);
-
-    if (req.user.user_id !== user_id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Không có quyền xoá địa chỉ" });
-    }
 
     const deleted = await Address.findOneAndDelete({ user_id, address_id });
 

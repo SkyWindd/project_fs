@@ -23,34 +23,41 @@ export default function EditProfileDialog() {
 
   const [fullName, setFullName] = useState(currentUser?.full_name || "");
   const [phone, setPhone] = useState(currentUser?.phone_number || "");
-  const [password, setPassword] = useState(currentUser?.password || "");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSave = async () => {
-    if (!currentUser) {
-      toast.error("Không tìm thấy thông tin người dùng ❌");
-      return;
-    }
+  if (!currentUser) {
+    toast.error("Không tìm thấy thông tin người dùng ❌");
+    return;
+  }
 
-    if (!fullName.trim()) {
-      toast.error("Tên không được để trống ❌");
-      return;
-    }
+  if (!fullName.trim()) {
+    toast.error("Tên không được để trống ❌");
+    return;
+  }
 
-        try {
-        const updated = await updateUserInfo(currentUser.user_id, {
-          full_name: fullName,
-          phone_number: phone,
-          password: password,
-        });
+  try {
+    const updated = await updateUserInfo(currentUser.user_id, {
+      full_name: fullName,
+      phone_number: phone,
+      password: password || undefined,
+    });
 
-        updateUser(updated); // cập nhật localStorage
-        toast.success("Cập nhật thành công!");
-        setOpen(false);
-      } catch (err: any) {
-        toast.error(err.message);
-      }
-    };
+    // GIỮ NGUYÊN user_id + dữ liệu không đổi
+    updateUser({
+      ...currentUser,
+      full_name: updated.full_name,
+      phone_number: updated.phone_number,
+    });
+
+    toast.success("Cập nhật thành công!");
+    setOpen(false);
+  } catch (err: any) {
+    toast.error(err.message);
+  }
+};
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

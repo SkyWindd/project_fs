@@ -45,7 +45,7 @@ export default function ProductModal({
   // ✅ Xử lý khi thêm sản phẩm vào giỏ
   const handleAddToCart = () => {
     addToCart({
-      id: product.item_id,
+      item_id: product.item_id,
       name: product.name,
       size: size === "small" ? "Nhỏ" : size === "large" ? "Lớn" : "Vừa",
       crust:

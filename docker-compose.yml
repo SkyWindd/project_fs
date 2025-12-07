@@ -35,7 +35,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - HOST=0.0.0.0
-      - VITE_API_URL=https://project-fs-g8y5.onrender.com
+      - VITE_API_URL=http://localhost:5000
     command: npm run dev
     depends_on:
       - backend

@@ -12,16 +12,20 @@ export default function ProfileInfo() {
   const { currentUser, updateUser } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!currentUser) return;
 
     fetchUser(currentUser.user_id)
       .then((data) => {
-        updateUser(data); // cập nhật lại từ backend
+        updateUser({
+          ...currentUser, // giữ lại user_id, email...
+          ...data.user,        // cập nhật các field mới
+        });
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
+
 
   if (!currentUser) {
     return <p className="text-center text-gray-500 py-6">Bạn chưa đăng nhập.</p>;

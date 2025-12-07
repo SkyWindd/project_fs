@@ -56,7 +56,7 @@ export default function SignupForm() {
       })
 
       // res.user = user thật từ MongoDB
-      login(res.user)
+      login(res.user, res.token)
       toast.success(`Tạo tài khoản thành công! Xin chào ${res.user.full_name} 🎉`)
 
       setTimeout(() => navigate("/"), 1000)

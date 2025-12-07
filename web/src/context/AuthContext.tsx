@@ -7,7 +7,6 @@ interface User {
   full_name: string
   email: string
   phone_number: string
-  password: string
   role: "admin" | "customer"
   is_active: boolean
   created_at: string
@@ -16,54 +15,60 @@ interface User {
 
 interface AuthContextType {
   currentUser: User | null
-  login: (user: User) => void
+  token: string | null
+  login: (user: User, token: string) => void
   logout: () => void
-  updateUser: (updatedUser: User) => void // ✅ thêm mới
+  updateUser: (updatedUser: User) => void
 }
 
-// ✅ Tạo context
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// ✅ Provider
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
 
-  // 🔹 Load user từ localStorage khi app khởi động
+  // Load user + token khi app mở
   useEffect(() => {
-    const stored = localStorage.getItem("currentUser")
-    if (stored) setCurrentUser(JSON.parse(stored))
+    const savedUser = localStorage.getItem("currentUser")
+    const savedToken = localStorage.getItem("token")
+
+    if (savedUser) setCurrentUser(JSON.parse(savedUser))
+    if (savedToken) setToken(savedToken)
   }, [])
 
-  // 🔹 Đăng nhập
-  const login = (user: User) => {
+  // Đăng nhập → LƯU TOKEN + USER
+  const login = (user: User, token: string) => {
     localStorage.setItem("currentUser", JSON.stringify(user))
+    localStorage.setItem("token", token)
+
     setCurrentUser(user)
+    setToken(token)
   }
 
-  // 🔹 Đăng xuất
+  // Đăng xuất → XOÁ TOKEN + USER
   const logout = () => {
     localStorage.removeItem("currentUser")
+    localStorage.removeItem("token")
+
     setCurrentUser(null)
+    setToken(null)
   }
 
-  // 🔹 Cập nhật thông tin user
+  // Cập nhật thông tin user
   const updateUser = (updatedUser: User) => {
     localStorage.setItem("currentUser", JSON.stringify(updatedUser))
     setCurrentUser(updatedUser)
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ currentUser, token, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-// ✅ Custom hook
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider")
+  return ctx
 }

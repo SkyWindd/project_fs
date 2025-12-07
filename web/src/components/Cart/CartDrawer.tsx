@@ -82,7 +82,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 </div>
               ) : (
                 cartItems.map((item) => (
-                  <CartItemCard key={item.id} item={item} />
+                  <CartItemCard key={`${item.item_id}-${item.size}-${item.crust}`} item={item} />
                 ))
               )}
             </div>

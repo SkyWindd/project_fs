@@ -88,22 +88,23 @@ export default function Checkout() {
   }
 
   const payload = {
-    user_id: currentUser!.user_id,
-    store_id: selectedStore.store_id,
+  user_id: currentUser!.user_id,
+  store_id: selectedStore.store_id,
 
-    address: deliveryInfo.address,
-    latitude: deliveryInfo.latitude,
-    longitude: deliveryInfo.longitude,
+  address: deliveryInfo.address,
+  latitude: deliveryInfo.latitude,
+  longitude: deliveryInfo.longitude,
 
-    note: deliveryInfo.note || "",
-    payment_method: paymentMethod,
+  note: deliveryInfo.note || "",
+  payment_method: paymentMethod,
 
-    cart: cartItems.map((i: any) => ({
-      item_id: i.item_id,
-      price: i.price,
-      quantity: i.quantity
-    })),
-  };
+  cart: cartItems.map((i: any) => ({
+    item_id: i.item_id,
+    price: i.price,
+    quantity: i.quantity
+  })),
+};
+
 
   console.log("📦 Payload gửi backend:", payload);
 

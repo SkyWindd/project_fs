@@ -8,7 +8,7 @@ import { Checkbox } from "../../components/ui/checkbox"
 import { Button } from "../../components/ui/button"
 
 interface CartItem {
-  id: number
+  item_id: number
   name: string
   price: number
   quantity: number
@@ -51,7 +51,7 @@ export default function SummarySection({
         <ul className="divide-y divide-gray-100">
             {cartItems.map((item) => (
               <li
-                key={item.id}
+                key={`${item.item_id}-${item.size || ""}-${item.crust || ""}`}
                 className="flex items-center justify-between gap-3 py-4"
               >
 

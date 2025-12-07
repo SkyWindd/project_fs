@@ -21,7 +21,8 @@ export default function AddressList() {
   // 🔥 Load địa chỉ từ backend
   useEffect(() => {
     if (!currentUser) return
-    fetchUserAddresses(currentUser.user_id).then(setAddresses)
+    fetchUserAddresses(currentUser.user_id)
+    .then((res) => setAddresses(res.addresses || []))
   }, [currentUser])
 
   if (!currentUser)
@@ -41,40 +42,48 @@ export default function AddressList() {
   try {
     if (!currentUser) return;
 
-    if (selectedAddress === null) {
+    if (!selectedAddress) {
       // ➕ Thêm mới
-      const newAddr = await addAddress(currentUser.user_id, data);
-      setAddresses((prev) => [...prev, newAddr]);
+      const res = await addAddress(currentUser.user_id, data);
+      const newAddr = res.address || res;
+
+      setAddresses(prev => [...prev, newAddr]);
+
     } else {
       // ✏ Chỉnh sửa
-      const updated = await editAddress(
-        currentUser.user_id,                  // ❗ PHẢI có userId
-        selectedAddress.address_id,           // ❗ addressId tách riêng
-        data                                  // body
+      const res = await editAddress(
+        currentUser.user_id,
+        selectedAddress.address_id,
+        data
       );
 
-      setAddresses((prev) =>
-        prev.map((a) =>
-          a.address_id === updated.address_id ? updated : a
+      const updated = res.address || res; 
+      const id = updated.address_id || updated._id;
+
+      setAddresses(prev =>
+        prev.map(a =>
+          (a.address_id || a._id) === id ? updated : a
         )
       );
     }
 
     setOpenDialog(false);
   } catch (err) {
-    console.error(err);
     toast.error("Lỗi khi lưu địa chỉ ❌");
   }
 };
+
 
 const handleDelete = async (addr: any) => {
   try {
     if (!currentUser) return;
 
-    await deleteAddress(currentUser.user_id, addr.address_id); // ❗ đúng API
+    await deleteAddress(currentUser.user_id, addr.address_id);
 
-    setAddresses((prev) =>
-      prev.filter((x) => x.address_id !== addr.address_id)
+    setAddresses(prev =>
+      prev.filter(x =>
+        (x.address_id || x._id) !== (addr.address_id || addr._id)
+      )
     );
 
     toast.success("Đã xoá địa chỉ 🗑️");

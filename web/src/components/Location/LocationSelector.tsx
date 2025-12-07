@@ -42,7 +42,7 @@ export default function LocationSelector() {
     }
 
     fetchUserAddresses(currentUser.user_id)
-      .then((res) => setUserAddresses(res))
+      .then((res) => setUserAddresses(res.addresses || []))
       .finally(() => setLoadingAddress(false))
   }, [currentUser])
 

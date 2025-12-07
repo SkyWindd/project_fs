@@ -59,17 +59,19 @@ router.post("/", authMiddleware, async (req, res) => {
       updated_at: new Date().toISOString(),
     });
 
-   // ⭐ Tạo order detail
-// ⭐ Lấy item từ DB để đảm bảo item_id & price đúng
+  
+// ⭐ Tạo order detail
 let lastDetail = await OrderDetail.findOne().sort({ order_detail_id: -1 });
 let nextDetailId = lastDetail ? lastDetail.order_detail_id + 1 : 1;
 
 for (const c of cart) {
-  const itemId = Number(c.item_id);
+ 
 
-  if (!itemId) {
+  if (c.item_id == null) {
     return res.status(400).json({ error: "Thiếu item_id trong cart" });
   }
+
+  const itemId = Number(c.item_id);
 
   const menuItem = await MenuItem.findOne({ item_id: itemId });
   if (!menuItem) {
@@ -80,27 +82,17 @@ for (const c of cart) {
   const quantity = c.quantity;
   const subtotal = price * quantity;
 
-  console.log("➡ ORDER DETAIL WILL BE CREATED:", {
-    item_id: itemId,
-    price,
-    quantity,
-    subtotal
-  });
-
   await OrderDetail.create({
     order_detail_id: nextDetailId++,
     order_id: newOrderId,
-    item_id: itemId,       // ⭐ Đảm bảo item_id chắc chắn có
+    item_id: itemId,
     quantity,
     price,
     subtotal,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   });
 }
 
-
-
-    await OrderDetail.insertMany(detailPayload);
 
     // ⭐ Tạo payment
     await Payment.create({

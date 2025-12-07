@@ -11,7 +11,7 @@ export default function ProfileOrders() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser?.user_id) return;
 
     fetchOrdersByUser(currentUser.user_id)
       .then((data) => setOrders(data)) // data = [{ order, address, details, payment, tracking, items }]
