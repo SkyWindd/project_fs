@@ -6,13 +6,13 @@ import {
   deleteUser
 } from "../controllers/adminUser.controller.js";
 
-import { authenticateToken } from "../middlewares/auth.js";
+import { authMiddleware } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/admin.middleware.js";
 
 const router = express.Router();
 
 // tất cả route admin đều cần login + admin role
-router.use(authenticateToken, requireAdmin);
+router.use(authMiddleware, requireAdmin);
 
 router.get("/", getAllUsers);
 router.post("/", createUser);

@@ -23,9 +23,10 @@ interface Props {
     is_active: boolean;
   };
   setFormData: (data: any) => void;
-  onSuccess: () => void; // 🔥 gọi lại để reload danh sách user
-  editingUser: any | null; // backend trả user theo dạng MongoDB
+  onSuccess: () => void; 
+  editingUser: any | null;
 }
+
 
 export function UserDialog({
   open,
@@ -54,6 +55,8 @@ export function UserDialog({
       alert(err.message || "Lỗi khi lưu dữ liệu");
     }
   };
+  
+  
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

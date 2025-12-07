@@ -193,8 +193,10 @@ export async function createOrder(data: any) {
   return json;
 }
 
+
 export async function adminGetUsers() {
-  return authFetch("/api/admin/users");
+  const data = await authFetch("/api/admin/users");
+  return data;  // ⬅️ data = JSON từ backend: { users: [...] }
 }
 
 export async function adminCreateUser(data: any) {
