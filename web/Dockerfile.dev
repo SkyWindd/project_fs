@@ -3,13 +3,13 @@ FROM node:20-bookworm
 
 WORKDIR /app
 
-# Copy package files
+# Copy package.json + package-lock.json
 COPY package*.json ./
 
-# Install dependencies with cache
-RUN --mount=type=cache,target=/root/.npm npm install
+# Install dependencies
+RUN npm install
 
-# Copy full source code
+# Copy toàn bộ code
 COPY . .
 
 EXPOSE 5173
