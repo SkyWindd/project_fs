@@ -195,26 +195,26 @@ export async function createOrder(data: any) {
 
 
 export async function adminGetUsers() {
-  const data = await authFetch("/api/admin/users");
-  return data;  // ⬅️ data = JSON từ backend: { users: [...] }
+  return authFetch(`${API_URL}/api/admin/users`)
 }
 
 export async function adminCreateUser(data: any) {
-  return authFetch("/api/admin/users", {
+  return authFetch(`${API_URL}/api/admin/users`, {
     method: "POST",
     body: JSON.stringify(data),
-  });
+  })
 }
 
 export async function adminUpdateUser(id: string, data: any) {
-  return authFetch(`/api/admin/users/${id}`, {
+  return authFetch(`${API_URL}/api/admin/users/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
-  });
+  })
 }
 
 export async function adminDeleteUser(id: string) {
-  return authFetch(`/api/admin/users/${id}`, {
+  return authFetch(`${API_URL}/api/admin/users/${id}`, {
     method: "DELETE",
-  });
+  })
 }
+
