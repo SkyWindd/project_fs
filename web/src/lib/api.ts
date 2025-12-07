@@ -192,3 +192,27 @@ export async function createOrder(data: any) {
 
   return json;
 }
+
+export async function adminGetUsers() {
+  return authFetch("/api/admin/users");
+}
+
+export async function adminCreateUser(data: any) {
+  return authFetch("/api/admin/users", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminUpdateUser(id: string, data: any) {
+  return authFetch(`/api/admin/users/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminDeleteUser(id: string) {
+  return authFetch(`/api/admin/users/${id}`, {
+    method: "DELETE",
+  });
+}
