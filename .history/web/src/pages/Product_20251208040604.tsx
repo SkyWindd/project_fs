@@ -7,7 +7,6 @@ import ProductCard from "../components/ProductAdmin/ProductCard";
 import ProductDialog from "../components/ProductAdmin/ProductDialog";
 import { mockMenuItems } from "../../mock/mockData";
 import type { MenuItem } from "../../mock/mockData";
-  import { mockCategories } from "../../mock/mockData";
 import { Plus, Search } from "lucide-react";
 
 export default function Products() {
@@ -16,6 +15,8 @@ export default function Products() {
   const [filter, setFilter] = useState<number | "all">("all");
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
+  import { mockCategories } from "../../mock/mockData";
 
 const [categories, setCategories] = useState(mockCategories);
 const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
@@ -133,14 +134,14 @@ const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
       </div>
 
       {/* Dialog thêm/sửa */}
-    <ProductDialog
-      open={isDialogOpen}
-      onOpenChange={setIsDialogOpen}
-      item={editingItem}
-      onSave={editingItem ? handleEdit : handleAdd}
-      categories={categories}
-      onOpenAddCategory={() => setIsAddCategoryOpen(true)}
-    />
+<ProductDialog
+  open={isDialogOpen}
+  onOpenChange={setIsDialogOpen}
+  item={editingItem}
+  onSave={editingItem ? handleEdit : handleAdd}
+  categories={categories}
+  onOpenAddCategory={() => setIsAddCategoryOpen(true)}
+/>
 
     </div>
   );

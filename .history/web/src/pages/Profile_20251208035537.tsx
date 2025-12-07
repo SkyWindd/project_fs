@@ -5,7 +5,7 @@ import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import ProductCard from "../components/ProductAdmin/ProductCard";
 import ProductDialog from "../components/ProductAdmin/ProductDialog";
-import AddCategoryDialog from "../components/ProductAdmin/AddCategory";
+import AddCategoryDialog from "../components/ProductAdmin/AddCategoryDialog";
 
 import { mockMenuItems, mockCategories } from "../../mock/mockData";
 import type { MenuItem, Category } from "../../mock/mockData";
@@ -122,17 +122,15 @@ export default function Products() {
         ))}
       </div>
 
+      {/* Dialogs */}
       <ProductDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         item={editingItem}
         onSave={editingItem ? handleEdit : handleAdd}
-        categories={categories}                 // ⭐ THÊM
-        onOpenAddCategory={() => {              // ⭐ THÊM
-            setIsCategoryDialogOpen(true);
-        }}
+        categories={categories}
+        onOpenAddCategory={() => setIsCategoryDialogOpen(true)}
       />
-
 
       <AddCategoryDialog
         open={isCategoryDialogOpen}

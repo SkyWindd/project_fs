@@ -123,15 +123,15 @@ export default function Products() {
       </div>
 
       <ProductDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        item={editingItem}
-        onSave={editingItem ? handleEdit : handleAdd}
-        categories={categories}                 // ⭐ THÊM
-        onOpenAddCategory={() => {              // ⭐ THÊM
-            setIsCategoryDialogOpen(true);
-        }}
-      />
+  open={isDialogOpen}
+  onOpenChange={setIsDialogOpen}
+  item={editingItem}
+  onSave={editingItem ? handleEdit : handleAdd}
+  categories={categories}                 // ⭐ THÊM
+  onOpenAddCategory={() => {              // ⭐ THÊM
+      setIsCategoryDialogOpen(true);
+  }}
+/>
 
 
       <AddCategoryDialog

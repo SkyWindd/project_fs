@@ -133,14 +133,14 @@ const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
       </div>
 
       {/* Dialog thêm/sửa */}
-    <ProductDialog
-      open={isDialogOpen}
-      onOpenChange={setIsDialogOpen}
-      item={editingItem}
-      onSave={editingItem ? handleEdit : handleAdd}
-      categories={categories}
-      onOpenAddCategory={() => setIsAddCategoryOpen(true)}
-    />
+<ProductDialog
+  open={isDialogOpen}
+  onOpenChange={setIsDialogOpen}
+  item={editingItem}
+  onSave={editingItem ? handleEdit : handleAdd}
+  categories={categories}
+  onOpenAddCategory={() => setIsAddCategoryOpen(true)}
+/>
 
     </div>
   );

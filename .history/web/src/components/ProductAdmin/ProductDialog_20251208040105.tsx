@@ -20,15 +20,15 @@ import {
 import type { MenuItem, Category } from "../../../mock/mockData";
 
 // 🔥 THÊM PROP categories + onOpenAddCategory
-export interface ProductDialogProps {
+interface ProductDialogProps {
   open: boolean;
-  onOpenChange: (value: boolean) => void;
+  onOpenChange: (open: boolean) => void;
   item: MenuItem | null;
   onSave: (data: MenuItem) => void;
+
   categories: Category[];
   onOpenAddCategory: () => void;
 }
-
 
 export default function ProductDialog({
   open,

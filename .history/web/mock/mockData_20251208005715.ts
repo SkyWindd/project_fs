@@ -178,6 +178,13 @@ export const mockAddresses: Address[] = [
   },
 ];
 
+// mockData.ts
+
+export interface Category {
+  category_id: number;
+  category_name: string;
+}
+
 export const mockCategories: Category[] = [
   { category_id: 1, category_name: "Pizza" },
   { category_id: 2, category_name: "Món ăn kèm" },
