@@ -35,13 +35,13 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - HOST=0.0.0.0
-      - VITE_API_URL=http://localhost:5000
-    command: npm run dev
-    depends_on:
-      - backend
-    networks:
-      - projectnet
-
-networks:
-  projectnet:
+      - VITE_API_URL=https://project-fs-4d9l.onrender.com
+    command: npm run dev 
+    depends_on: 
+      - backend 
+    networks: 
+      - projectnet 
+    
+networks: 
+  projectnet: 
     driver: bridge
