@@ -6,7 +6,7 @@ import {
   deleteUser
 } from "../controllers/adminUser.controller.js";
 
-import { authenticateToken } from "../middlewares/auth.middleware.js";
+import { authenticateToken } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/admin.middleware.js";
 
 const router = express.Router();
