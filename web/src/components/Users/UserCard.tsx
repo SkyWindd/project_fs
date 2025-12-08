@@ -47,7 +47,7 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
 
         <p>
           <span className="font-medium">Cập nhật:</span>{" "}
-          {formatDateTime(user.updatedAt)}
+          {formatDateTime(user.updatedAt ?? user.createdAt)}
         </p>
 
         <div className="flex gap-2 pt-3">

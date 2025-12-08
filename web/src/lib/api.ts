@@ -218,3 +218,16 @@ export async function adminDeleteUser(id: string) {
   })
 }
 
+export function adminGetOrders() {
+  return fetch(`${API_URL}/api/admin/orders`, { 
+    method: "GET" 
+  });
+}
+
+export function adminUpdateOrderStatus(id: number, status: string) {
+  return fetch(`${API_URL}/api/admin/orders/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+}

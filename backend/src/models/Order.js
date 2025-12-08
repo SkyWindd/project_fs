@@ -19,7 +19,11 @@ const OrderSchema = new mongoose.Schema({
   delivery_fee: Number,
   discount: Number,
 
-  status: String,        // pending | delivering | completed | canceled
+  status: {
+    type: String,
+    enum: ["pending", "confirmed", "delivering", "completed", "cancelled"],
+    default: "pending",
+  },       
   assigned_time: String,
 
   note: String,

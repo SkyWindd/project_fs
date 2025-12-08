@@ -82,9 +82,9 @@ export default function Orders() {
         {filteredOrders.length > 0 ? (
           filteredOrders.map((order) => (
             <OrderCard
-              key={order.order_id}
               order={order}
-              onToggleStatus={() => toggleOrderStatus(order.order_id)}
+              onStatusChange={(newStatus) => adminUpdateOrder(order.order_id, newStatus)}
+              onAssignDrone={(droneId) => adminAssignDrone(order.order_id, droneId)}
             />
           ))
         ) : (

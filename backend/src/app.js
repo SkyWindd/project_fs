@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import storeRoutes from "./routes/store.routes.js";
 import adminUserRoutes from "./routes/adminUser.routes.js";
+import adminOrderRoutes from "./routes/adminOrder.routes.js";
 const app = express();
 
 app.use(cors({
@@ -18,6 +19,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
+app.use("/api/admin/orders", adminOrderRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/stores", storeRoutes);
 app.use("/api/users", userRoutes);

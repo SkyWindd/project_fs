@@ -6,17 +6,21 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // ✅ Định dạng giờ: giữ nguyên mock (Z), còn giờ thực thì chuyển sang múi giờ VN
-export const formatDateTime = (isoString: string) => {
-  const isUTC = isoString.endsWith("Z")
+export function formatDateTime(value?: string) {
+  // Nếu không có giá trị → trả fallback
+  if (!value || typeof value !== "string") return "Không có dữ liệu";
 
-  if (isUTC) {
-    const [date, time] = isoString.replace("Z", "").split("T")
-    const [year, month, day] = date.split("-")
-    return `${time} ${day}/${month}/${year}`
+  try {
+    // Một số MongoDB timestamp không có 'Z' → ta convert bình thường
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) return "Không hợp lệ";
+
+    return date.toLocaleString("vi-VN", {
+      hour12: false,
+    });
+  } catch (e) {
+    return "Không hợp lệ";
   }
-
-  return new Date(isoString).toLocaleString("vi-VN", {
-    timeZone: "Asia/Ho_Chi_Minh",
-  })
 }
 
